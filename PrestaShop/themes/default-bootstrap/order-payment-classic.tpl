@@ -311,6 +311,9 @@
             <i class="icon-chevron-left"></i>
             {l s='Continue shopping'}
         </a>
+		<button type="submit" name="processNextStep" class="button btn btn-default button-medium">
+					<span>{l s='Proceed to Next Step'}<i class="icon-chevron-right right"></i></span>
+		</button>
     </p>
     {else}
 </div> <!-- end opc_payment_methods -->

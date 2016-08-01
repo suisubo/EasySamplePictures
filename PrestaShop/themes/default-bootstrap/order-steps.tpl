@@ -54,8 +54,12 @@
 		{/if}
 	</li>
 
-	<li id="step_end" class="{if $current_step=='payment'}step_current{else}step_todo{/if} last">
+	<li class="{if $current_step=='payment'}step_current{elseif $current_step=='login' || $current_step=='summary'}step_todo{else}step_done{/if} third">
 		<span><em>03.</em> {l s='Payment'}</span>
+	</li>
+	
+	<li id="step_end" class="{if $current_step=='nextstep'}step_current{else}step_todo{/if} last">
+		<span><em>04.</em> {l s='Next Step'}</span>
 	</li>
 </ul>
 <!-- /Steps -->
