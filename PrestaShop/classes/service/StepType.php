@@ -1,6 +1,6 @@
 <?php
 
-class ServicesCore extends ObjectModel
+class ServiceTypeCore extends ObjectModel
 {
 	public $id_vendor;
 	public $price;
@@ -8,7 +8,7 @@ class ServicesCore extends ObjectModel
 	public $id_image;
 	
 	public static $definition = array(
-			'table' => 'service_type',
+			'table' => 'step_type',
 			'primary' => 'id_service_type',
 			'fields' => array(
 					'price' =>        array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'required' => true),
