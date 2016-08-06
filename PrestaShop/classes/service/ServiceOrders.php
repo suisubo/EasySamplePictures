@@ -15,8 +15,8 @@ class ServicesCore extends ObjectModel
 			'table' => 'service_orders',
 			'primary' => 'id_service_order',
 			'fields' => array(
-					'creation_time' =>        array('type' => self::TYPE_DATE, 'validate' => 'isUnsignedId', 'required' => true),
-					'finish_time' =>        array('type' => self::TYPE_DATE, 'validate' => 'isUnsignedId', 'required' => true),
+					'creation_time' =>        array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => true),
+					'finish_time' =>        array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
 					'id_customer' =>                    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
 					'id_shop' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
 					'id_cart' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
