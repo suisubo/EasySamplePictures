@@ -1,6 +1,6 @@
 <?php
 
-class ServicesCore extends ObjectModel
+class TransactionLogCore extends ObjectModel
 {
 	public $id_transaction;
 	public $id_step;
