@@ -10,6 +10,9 @@ abstract class AbstractHandlerCore
 	const PROCESS_SUCCESS = 0;
 	const PROCESS_FAIL = 1;
 	
+	const STEP_INPUT_PARTNER_CUSTOMER = 0;
+	const STEP_INPUT_PARTNER_VENDOR = 1;
+	
 	abstract public function getRequiredUIInputs();
 	abstract public function getUIDisplay();
 	abstract public function processUIInputs($inputs, $context, $mapping_ruls);
