@@ -7,11 +7,14 @@ abstract class AbstractHandlerCore
 	const UI_REQUEST_FILE_UPLOAD = 3;
 	const UI_REQUEST_FILE_DOWNLOAD = 4;
 	
+	const PROCESS_SUCCESS = 0;
+	const PROCESS_FAIL = 1;
+	
 	abstract public function getRequiredUIInputs();
-	abstract public function getDisplayMessage();
+	abstract public function getUIDisplay();
 	abstract public function processUIInputs($inputs, $context, $mapping_ruls);
 	abstract public function getReadableStatusString($lang);
-	abstract public function getPossibleExitCodes();
+	abstract public function getPossibleProcessCodes();
 	abstract public function getOutputVariableNames();
 	abstract public function getInputVariableNames(); 
 }
