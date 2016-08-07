@@ -13,5 +13,5 @@ abstract class AbstractHandlerCore
 	abstract public function getReadableStatusString($lang);
 	abstract public function getPossibleExitCodes();
 	abstract public function getOutputVariableNames();
-	abstract public function getInputVariableNames();
+	abstract public function getInputVariableNames(); 
 }
