@@ -11,7 +11,6 @@ class ServiceTypeCore extends ObjectModel
 			'table' => 'service_type',
 			'primary' => 'id_service_type',
 			'fields' => array(
-					'price' =>        array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'required' => true),
 					'active' =>        array('type' => self::TYPE_BOOL, 'validate' => 'isBool', 'required' => true),
 					'id_image' =>      array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
 			),
