@@ -12,7 +12,7 @@ class ServicesCore extends ObjectModel
 	public $id_currency;
 	
 	public static $definition = array(
-			'table' => 'service_orders',
+			'table' => 'z_service_orders',
 			'primary' => 'id_service_order',
 			'fields' => array(
 					'creation_time' =>        array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => true),

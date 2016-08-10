@@ -10,7 +10,7 @@ class TransactionLogCore extends ObjectModel
 	public $input;
 	
 	public static $definition = array(
-			'table' => 'transaction_log',
+			'table' => 'z_transaction_log',
 			'primary' => 'id_transaction_log',
 			'fields' => array(
 					'step_start_time' =>        array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => true),

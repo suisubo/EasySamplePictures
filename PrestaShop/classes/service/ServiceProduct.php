@@ -6,7 +6,7 @@ class ServiceProductCore extends ObjectModel
 	public $param_value;
 
 	public static $definition = array(
-			'table' => 'service_product',
+			'table' => 'z_service_product',
 			'primary' => 'id_service_product',
 			'fields' => array(
 					'product_name' =>        array('type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'required' => true),

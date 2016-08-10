@@ -8,7 +8,7 @@ class ServiceTypeCore extends ObjectModel
 	public $id_image;
 
 	public static $definition = array(
-			'table' => 'service_type',
+			'table' => 'z_service_type',
 			'primary' => 'id_service_type',
 			'fields' => array(
 					'active' =>        array('type' => self::TYPE_BOOL, 'validate' => 'isBool', 'required' => true),

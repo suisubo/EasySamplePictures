@@ -11,7 +11,7 @@ class TransactionCore extends ObjectModel
 	public $context;
 		
 	public static $definition = array(
-			'table' => 'transaction',
+			'table' => 'z_transaction',
 			'primary' => 'id_transaction',
 			'fields' => array(
 					'id_service_type' =>        array('type' => self::TYPE_DATE, 'validate' => 'isUnsignedId', 'required' => true),
