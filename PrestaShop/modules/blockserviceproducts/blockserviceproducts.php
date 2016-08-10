@@ -27,7 +27,7 @@
 if (!defined('_PS_VERSION_'))
 	exit;
 
-class BlockNewProducts extends Module
+class BlockServiceProducts extends Module
 {
 	protected static $cache_new_products;
 
@@ -75,7 +75,7 @@ class BlockNewProducts extends Module
 	public function getContent()
 	{
 		$output = '';
-		if (Tools::isSubmit('submitBlockNewProducts'))
+		if (Tools::isSubmit('submitBlockServiceProducts'))
 		{
 			if (!($productNbr = Tools::getValue('NEW_PRODUCTS_NBR')) || empty($productNbr))
 				$output .= $this->displayError($this->l('Please complete the "products to display" field.'));
@@ -250,7 +250,7 @@ class BlockNewProducts extends Module
 		$helper->default_form_language = $lang->id;
 		$helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ? Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') : 0;
 		$helper->identifier = $this->identifier;
-		$helper->submit_action = 'submitBlockNewProducts';
+		$helper->submit_action = 'submitBlockServiceProducts';
 		$helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false).'&configure='.$this->name.'&tab_module='.$this->tab.'&module_name='.$this->name;
 		$helper->token = Tools::getAdminTokenLite('AdminModules');
 		$helper->tpl_vars = array(
