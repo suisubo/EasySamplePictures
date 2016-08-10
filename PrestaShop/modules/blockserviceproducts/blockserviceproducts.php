@@ -33,17 +33,17 @@ class BlockNewProducts extends Module
 
 	public function __construct()
 	{
-		$this->name = 'blocknewproducts';
+		$this->name = 'blockserviceproducts';
 		$this->tab = 'front_office_features';
 		$this->version = '1.10.1';
-		$this->author = 'PrestaShop';
+		$this->author = 'Roger';
 		$this->need_instance = 0;
 
 		$this->bootstrap = true;
 		parent::__construct();
 
-		$this->displayName = $this->l('New products block');
-		$this->description = $this->l('Displays a block featuring your store\'s newest products.');
+		$this->displayName = $this->l('Service products block');
+		$this->description = $this->l('Displays a block featuring your store\'s service products.');
 		$this->ps_versions_compliancy = array('min' => '1.6', 'max' => '1.6.99.99');
 	}
 
