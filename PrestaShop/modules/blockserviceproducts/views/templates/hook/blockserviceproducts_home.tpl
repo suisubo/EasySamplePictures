@@ -22,10 +22,10 @@
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
-{if isset($new_products) && $new_products}
-	{include file="$tpl_dir./product-list.tpl" products=$new_products class='blocknewproducts tab-pane' id='blocknewproducts'}
+{if isset($service_products) && $service_products}
+	{include file="$tpl_dir./product-list.tpl" products=$service_products class='blockserviceproducts tab-pane' id='blockserviceproducts'}
 {else}
-<ul id="blocknewproducts" class="blocknewproducts tab-pane">
-	<li class="alert alert-info">{l s='No new products at this time.' mod='blocknewproducts'}</li>
+<ul id="blockserviceproducts" class="blockserviceproducts tab-pane">
+	<li class="alert alert-info">{l s='No service products at this time.' mod='blockserviceproducts'}</li>
 </ul>
 {/if}

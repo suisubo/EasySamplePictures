@@ -22,4 +22,4 @@
 *  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 *}
-<li><a data-toggle="tab" href="#blocknewproducts" class="blocknewproducts">{l s='New arrivals' mod='blocknewproducts'}</a></li>
+<li><a data-toggle="tab" href="#blockserviceproducts" class="blockserviceproducts">{l s='Available Services' mod='blockserviceproducts'}</a></li>

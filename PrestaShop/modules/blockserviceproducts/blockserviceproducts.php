@@ -93,7 +93,7 @@ class BlockServiceProducts extends Module
 		return $output.$this->renderForm();
 	}
 
-	protected function getNewProducts()
+	protected function getServiceProducts()
 	{
 		if (!Configuration::get('NEW_PRODUCTS_NBR'))
 			return;
@@ -111,7 +111,7 @@ class BlockServiceProducts extends Module
 		if (!$this->isCached('blocknewproducts.tpl', $this->getCacheId()))
 		{
 			if (!isset(BlockNewProducts::$cache_new_products))
-				BlockNewProducts::$cache_new_products = $this->getNewProducts();
+				BlockNewProducts::$cache_new_products = $this->getServiceProducts();
 
 			$this->smarty->assign(array(
 				'new_products' => BlockNewProducts::$cache_new_products,
@@ -141,7 +141,7 @@ class BlockServiceProducts extends Module
 	public function hookdisplayHomeTab($params)
 	{
 		if (!$this->isCached('tab.tpl', $this->getCacheId('blocknewproducts-tab')))
-			BlockNewProducts::$cache_new_products = $this->getNewProducts();
+			BlockNewProducts::$cache_new_products = $this->getServiceProducts();
 
 		if (BlockNewProducts::$cache_new_products === false)
 			return false;
@@ -154,7 +154,7 @@ class BlockServiceProducts extends Module
 		if (!$this->isCached('blocknewproducts_home.tpl', $this->getCacheId('blocknewproducts-home')))
 		{
 			$this->smarty->assign(array(
-				'new_products' => BlockNewProducts::$cache_new_products,
+				'service_products' => BlockNewProducts::$cache_new_products,
 				'mediumSize' => Image::getSize(ImageType::getFormatedName('medium')),
 				'homeSize' => Image::getSize(ImageType::getFormatedName('home'))
 			));
