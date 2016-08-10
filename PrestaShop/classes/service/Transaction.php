@@ -7,8 +7,7 @@ class TransactionCore extends ObjectModel
 	public $current_step;
 	public $status;
 	public $id_service_order;
-	public $finish_time;
-	public $context;
+	public $finish_time;	
 		
 	public static $definition = array(
 			'table' => 'z_transaction',
@@ -19,8 +18,7 @@ class TransactionCore extends ObjectModel
 					'current_step' =>                    array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
 					'status' =>                array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
 					'finish_time' =>                array('type' => self::TYPE_DATE, 'validate' => 'isDate'),
-					'context' =>                    array('type' => self::TYPE_STRING, 'validate' => 'isString', 'required' => true),
-			),
+			 ),
 	);
 	
 }
