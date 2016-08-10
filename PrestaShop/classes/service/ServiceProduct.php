@@ -14,5 +14,12 @@ class ServiceProductCore extends ObjectModel
 					'id_service_type' =>      array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
 			),
 	);
+	
+	public static function getServiceProducts()
+	{
+		$sql = 'SELECT p.* FROM `'._DB_PREFIX_.'z_service_product` p';
+		$rq = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+		return ($rq);
+	}
 
 }
