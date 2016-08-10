@@ -29,7 +29,7 @@ if (!defined('_PS_VERSION_'))
 
 class BlockServiceProducts extends Module
 {
-	protected static $cache_new_products;
+	protected static $cache_service_products;
 
 	public function __construct()
 	{
@@ -108,28 +108,28 @@ class BlockServiceProducts extends Module
 
 	public function hookRightColumn($params)
 	{
-		if (!$this->isCached('blocknewproducts.tpl', $this->getCacheId()))
+		if (!$this->isCached('blockserviceproducts.tpl', $this->getCacheId()))
 		{
-			if (!isset(BlockNewProducts::$cache_new_products))
-				BlockNewProducts::$cache_new_products = $this->getServiceProducts();
+			if (!isset(BlockServiceProducts::$cache_service_products))
+				BlockServiceProducts::$cache_service_products = $this->getServiceProducts();
 
 			$this->smarty->assign(array(
-				'new_products' => BlockNewProducts::$cache_new_products,
+				'new_products' => BlockServiceProducts::$cache_service_products,
 				'mediumSize' => Image::getSize(ImageType::getFormatedName('medium')),
 				'homeSize' => Image::getSize(ImageType::getFormatedName('home'))
 			));
 		}
 
-		if (BlockNewProducts::$cache_new_products === false)
+		if (BlockServiceProducts::$cache_service_products === false)
 			return false;
 
-		return $this->display(__FILE__, 'blocknewproducts.tpl', $this->getCacheId());
+		return $this->display(__FILE__, 'blockserviceproducts.tpl', $this->getCacheId());
 	}
 
 	protected function getCacheId($name = null)
 	{
 		if ($name === null)
-			$name = 'blocknewproducts';
+			$name = 'blockserviceproducts';
 		return parent::getCacheId($name.'|'.date('Ymd'));
 	}
 
@@ -141,9 +141,9 @@ class BlockServiceProducts extends Module
 	public function hookdisplayHomeTab($params)
 	{
 		if (!$this->isCached('tab.tpl', $this->getCacheId('blocknewproducts-tab')))
-			BlockNewProducts::$cache_new_products = $this->getServiceProducts();
+			BlockServiceProducts::$cache_service_products = $this->getServiceProducts();
 
-		if (BlockNewProducts::$cache_new_products === false)
+		if (BlockServiceProducts::$cache_service_products === false)
 			return false;
 
 		return $this->display(__FILE__, 'tab.tpl', $this->getCacheId('blocknewproducts-tab'));
@@ -151,19 +151,19 @@ class BlockServiceProducts extends Module
 
 	public function hookdisplayHomeTabContent($params)
 	{
-		if (!$this->isCached('blocknewproducts_home.tpl', $this->getCacheId('blocknewproducts-home')))
+		if (!$this->isCached('blockserviceproducts_home.tpl', $this->getCacheId('blockserviceproducts-home')))
 		{
 			$this->smarty->assign(array(
-				'service_products' => BlockNewProducts::$cache_new_products,
+				'service_products' => BlockServiceProducts::$cache_service_products,
 				'mediumSize' => Image::getSize(ImageType::getFormatedName('medium')),
 				'homeSize' => Image::getSize(ImageType::getFormatedName('home'))
 			));
 		}
 
-		if (BlockNewProducts::$cache_new_products === false)
+		if (BlockServiceProducts::$cache_service_products === false)
 			return false;
 
-		return $this->display(__FILE__, 'blocknewproducts_home.tpl', $this->getCacheId('blocknewproducts-home'));
+		return $this->display(__FILE__, 'blockserviceproducts_home.tpl', $this->getCacheId('blockserviceproducts-home'));
 	}
 
 	public function hookHeader($params)
