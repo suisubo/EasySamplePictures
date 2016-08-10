@@ -55,7 +55,7 @@ class BlockServiceProducts extends Module
 			&& $this->registerHook('addproduct')
 			&& $this->registerHook('updateproduct')
 			&& $this->registerHook('deleteproduct')
-			&& Configuration::updateValue('NEW_PRODUCTS_NBR', 5)
+			&& Configuration::updateValue('SERVICE_PRODUCTS_NBR', 5)
 			&& $this->registerHook('displayHomeTab')
 			&& $this->registerHook('displayHomeTabContent')
 		);
@@ -77,15 +77,15 @@ class BlockServiceProducts extends Module
 		$output = '';
 		if (Tools::isSubmit('submitBlockServiceProducts'))
 		{
-			if (!($productNbr = Tools::getValue('NEW_PRODUCTS_NBR')) || empty($productNbr))
+			if (!($productNbr = Tools::getValue('SERVICE_PRODUCTS_NBR')) || empty($productNbr))
 				$output .= $this->displayError($this->l('Please complete the "products to display" field.'));
 			elseif ((int)($productNbr) == 0)
 				$output .= $this->displayError($this->l('Invalid number.'));
 			else
 			{
-				Configuration::updateValue('PS_NB_DAYS_NEW_PRODUCT', (int)(Tools::getValue('PS_NB_DAYS_NEW_PRODUCT')));
-				Configuration::updateValue('PS_BLOCK_NEWPRODUCTS_DISPLAY', (int)(Tools::getValue('PS_BLOCK_NEWPRODUCTS_DISPLAY')));
-				Configuration::updateValue('NEW_PRODUCTS_NBR', (int)($productNbr));
+				Configuration::updateValue('PS_NB_DAYS_SERVICE_PRODUCT', (int)(Tools::getValue('PS_NB_DAYS_SERVICE_PRODUCT')));
+				Configuration::updateValue('PS_BLOCK_SERVICEPRODUCTS_DISPLAY', (int)(Tools::getValue('PS_BLOCK_SERVICEPRODUCTS_DISPLAY')));
+				Configuration::updateValue('SERVICE_PRODUCTS_NBR', (int)($productNbr));
 				$this->_clearCache('*');
 				$output .= $this->displayConfirmation($this->l('Settings updated'));
 			}
@@ -95,15 +95,9 @@ class BlockServiceProducts extends Module
 
 	protected function getServiceProducts()
 	{
-		if (!Configuration::get('NEW_PRODUCTS_NBR'))
-			return;
-		$newProducts = false;
-		if (Configuration::get('PS_NB_DAYS_NEW_PRODUCT'))
-			$newProducts = Product::getNewProducts((int) $this->context->language->id, 0, (int)Configuration::get('NEW_PRODUCTS_NBR'));
-
-		if (!$newProducts && Configuration::get('PS_BLOCK_NEWPRODUCTS_DISPLAY'))
-			return;
-		return $newProducts;
+		$serviceProducts = false;
+		$serviceProducts = ServiceProduct::getServiceProducts();
+		return $serviceProducts;
 	}
 
 	public function hookRightColumn($params)
@@ -208,20 +202,20 @@ class BlockServiceProducts extends Module
 					array(
 						'type' => 'text',
 						'label' => $this->l('Products to display'),
-						'name' => 'NEW_PRODUCTS_NBR',
+						'name' => 'SERVICE_PRODUCTS_NBR',
 						'class' => 'fixed-width-xs',
 						'desc' => $this->l('Define the number of products to be displayed in this block.')
 					),
 					array(
 						'type'  => 'text',
 						'label' => $this->l('Number of days for which the product is considered \'new\''),
-						'name'  => 'PS_NB_DAYS_NEW_PRODUCT',
+						'name'  => 'PS_NB_DAYS_SERVICE_PRODUCT',
 						'class' => 'fixed-width-xs',
 					),
 					array(
 						'type' => 'switch',
 						'label' => $this->l('Always display this block'),
-						'name' => 'PS_BLOCK_NEWPRODUCTS_DISPLAY',
+						'name' => 'PS_BLOCK_SERVICEPRODUCTS_DISPLAY',
 						'desc' => $this->l('Show the block even if no new products are available.'),
 						'values' => array(
 							array(
@@ -265,9 +259,9 @@ class BlockServiceProducts extends Module
 	public function getConfigFieldsValues()
 	{
 		return array(
-			'PS_NB_DAYS_NEW_PRODUCT' => Tools::getValue('PS_NB_DAYS_NEW_PRODUCT', Configuration::get('PS_NB_DAYS_NEW_PRODUCT')),
-			'PS_BLOCK_NEWPRODUCTS_DISPLAY' => Tools::getValue('PS_BLOCK_NEWPRODUCTS_DISPLAY', Configuration::get('PS_BLOCK_NEWPRODUCTS_DISPLAY')),
-			'NEW_PRODUCTS_NBR' => Tools::getValue('NEW_PRODUCTS_NBR', Configuration::get('NEW_PRODUCTS_NBR')),
+			'PS_NB_DAYS_SERVICE_PRODUCT' => Tools::getValue('PS_NB_DAYS_SERVICE_PRODUCT', Configuration::get('PS_NB_DAYS_SERVICE_PRODUCT')),
+			'PS_BLOCK_SERVICEPRODUCTS_DISPLAY' => Tools::getValue('PS_BLOCK_SERVICEPRODUCTS_DISPLAY', Configuration::get('PS_BLOCK_SERVICEPRODUCTS_DISPLAY')),
+			'SERVICE_PRODUCTS_NBR' => Tools::getValue('SERVICE_PRODUCTS_NBR', Configuration::get('SERVICE_PRODUCTS_NBR')),
 		);
 	}
 }
