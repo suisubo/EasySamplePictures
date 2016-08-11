@@ -134,13 +134,13 @@ class BlockServiceProducts extends Module
 
 	public function hookdisplayHomeTab($params)
 	{
-		if (!$this->isCached('tab.tpl', $this->getCacheId('blocknewproducts-tab')))
+		if (!$this->isCached('tab.tpl', $this->getCacheId('blockserviceproducts-tab')))
 			BlockServiceProducts::$cache_service_products = $this->getServiceProducts();
 
 		if (BlockServiceProducts::$cache_service_products === false)
 			return false;
 
-		return $this->display(__FILE__, 'tab.tpl', $this->getCacheId('blocknewproducts-tab'));
+		return $this->display(__FILE__, 'tab.tpl', $this->getCacheId('blockserviceproducts-tab'));
 	}
 
 	public function hookdisplayHomeTabContent($params)
