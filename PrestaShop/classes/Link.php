@@ -155,6 +155,34 @@ class LinkCore
 
         return $url.$dispatcher->createUrl('product_rule', $id_lang, $params, $force_routes, $anchor, $id_shop);
     }
+    
+    public function getServiceProductLink($serviceproduct, $alias = null, $id_lang = null, $id_shop = null, $ipa = 0, $force_routes = false, $relative_protocol = false, $add_anchor = false)
+    {
+    	$dispatcher = Dispatcher::getInstance();
+    
+    	if (!$id_lang) {
+    		$id_lang = Context::getContext()->language->id;
+    	}
+    
+    	$url = $this->getBaseLink($id_shop, null, $relative_protocol).$this->getLangLink($id_lang, null, $id_shop);
+    
+    	if (!is_object($serviceproduct)) {
+    		if (is_array($serviceproduct) && isset($product['id_service_product'])) {
+    			$serviceproduct = new Product($product['id_service_product'], false, $id_lang, $id_shop);
+    		} elseif ((int)$serviceproduct) {
+    			$serviceproduct = new ServiceProduct((int)$serviceproduct, false, $id_lang, $id_shop);
+    		} else {
+    			throw new PrestaShopException('Invalid service product vars');
+    		}
+    	}
+    
+    	// Set available keywords
+    	$params = array();
+    	$params['id'] = $serviceproduct->id;
+    	$params['rewrite'] = (!$alias) ? $serviceproduct->getFieldByLang('link_rewrite') : $alias;    
+    	
+    	return $url.$dispatcher->createUrl('service_rule', $id_lang, $params, $force_routes, $anchor, $id_shop);
+    }
 
     /**
      * Create a link to a category

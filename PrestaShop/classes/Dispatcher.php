@@ -124,6 +124,16 @@ class DispatcherCore
                 'tags' =>            array('regexp' => '[a-zA-Z0-9-\pL]*'),
             ),
         ),
+    		
+    	'service_rule' => array(
+    				'controller' =>    'service',
+    				'rule' =>        'service/{id}-{rewrite}.html',
+    				'keywords' => array(
+    						'id' =>            array('regexp' => '[0-9]+', 'param' => 'id_service_product'),
+    						'rewrite' =>        array('regexp' => '[_a-zA-Z0-9\pL\pS-]*'),    						
+    				),
+    	),
+    		
         /* Must be after the product and category rules in order to avoid conflict */
         'layered_rule' => array(
             'controller' =>    'category',
