@@ -27,7 +27,7 @@ class ServiceProductCore extends ObjectModel
 		$results_array = array();
 		
 		foreach ($rq as $row) {
-			$row['link'] = $context->link->getProductLink((int)$row['id_service_product'], $row['link_rewrite']);
+			$row['link'] = $context->link->getServiceProductLink((int)$row['id_service_product'], $row['link_rewrite']);
 			$results_array[] = $row;			
 		}
 		

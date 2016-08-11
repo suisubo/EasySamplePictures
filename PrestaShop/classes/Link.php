@@ -181,7 +181,7 @@ class LinkCore
     	$params['id'] = $serviceproduct->id;
     	$params['rewrite'] = (!$alias) ? $serviceproduct->getFieldByLang('link_rewrite') : $alias;    
     	
-    	return $url.$dispatcher->createUrl('service_rule', $id_lang, $params, $force_routes, $anchor, $id_shop);
+    	return $url.$dispatcher->createUrl('service_rule', $id_lang, $params, $force_routes, null, $id_shop);
     }
 
     /**
