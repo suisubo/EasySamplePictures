@@ -506,14 +506,13 @@ class CartCore extends ObjectModel
         $sql = new DbQuery();
 
         // Build SELECT
-        $sql->select('cp.`id_product_attribute`, cp.`id_product`, cp.`quantity` AS cart_quantity, cp.`id_shop`, p.`name`, p.`id_image`, p.`price`
-						p.`description_short`, p.`link_rewrite`');
+        $sql->select('cp.`id_product_attribute`, cp.`id_product`, cp.`quantity` AS cart_quantity, cp.`id_shop`, p.`name`, p.`id_image`, p.`price`, p.`description_short`, p.`link_rewrite`');
 
         // Build FROM
         $sql->from('cart_product', 'cp');
 
         // Build JOIN
-        $sql->leftJoin('service_product', 'p', 'p.`id_service_product` = cp.`id_product`');
+        $sql->leftJoin('z_service_product', 'p', 'p.`id_service_product` = cp.`id_product`');
         //$sql->innerJoin('product_shop', 'product_shop', '(product_shop.`id_shop` = cp.`id_shop` AND product_shop.`id_product` = p.`id_product`)');
         //$sql->leftJoin('product_lang', 'pl', '
 		//	p.`id_product` = pl.`id_product`
