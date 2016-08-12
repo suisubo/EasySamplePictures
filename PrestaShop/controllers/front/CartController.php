@@ -97,7 +97,7 @@ class CartControllerCore extends FrontController
      */
     protected function processDeleteProductInCart()
     {
-        if ($this->context->cart->deleteProduct($this->id_service_product, $this->id_product_attribute, $this->customization_id, $this->id_address_delivery)) {
+        if ($this->context->cart->deleteProduct($this->id_service_product)) {
             if (!Cart::getNbProducts((int)$this->context->cart->id)) {
                 $this->context->cart->setDeliveryOption(null);
                 $this->context->cart->gift = 0;
@@ -105,11 +105,11 @@ class CartControllerCore extends FrontController
                 $this->context->cart->update();
             }
         }
-        $removed = CartRule::autoRemoveFromCart();
-        CartRule::autoAddToCart();
-        if (count($removed) && (int)Tools::getValue('allow_refresh')) {
-            $this->ajax_refresh = true;
-        }
+//         $removed = CartRule::autoRemoveFromCart();
+//         CartRule::autoAddToCart();
+//         if (count($removed) && (int)Tools::getValue('allow_refresh')) {
+//             $this->ajax_refresh = true;
+//         }
     }
     
     /**
@@ -142,57 +142,57 @@ class CartControllerCore extends FrontController
             }           
 
             if (!$this->errors) {
-                $cart_rules = $this->context->cart->getCartRules();
-                $available_cart_rules = CartRule::getCustomerCartRules($this->context->language->id, (isset($this->context->customer->id) ? $this->context->customer->id : 0), true, true, true, $this->context->cart, false, true);
-                $update_quantity = $this->context->cart->updateQty($this->qty, $this->id_service_product, $this->id_product_attribute, $this->customization_id, Tools::getValue('op', 'up'), $this->id_address_delivery);
-                if ($update_quantity < 0) {
-                    // If product has attribute, minimal quantity is set with minimal quantity of attribute
-                    $minimal_quantity = 1;
-                    $this->errors[] = sprintf(Tools::displayError('You must add %d minimum quantity', !Tools::getValue('ajax')), $minimal_quantity);
-                } elseif (!$update_quantity) {
-                    $this->errors[] = Tools::displayError('You already have the maximum quantity available for this product.', !Tools::getValue('ajax'));
-                } elseif ((int)Tools::getValue('allow_refresh')) {
-                    // If the cart rules has changed, we need to refresh the whole cart
-                    $cart_rules2 = $this->context->cart->getCartRules();
-                    if (count($cart_rules2) != count($cart_rules)) {
-                        $this->ajax_refresh = true;
-                    } elseif (count($cart_rules2)) {
-                        $rule_list = array();
-                        foreach ($cart_rules2 as $rule) {
-                            $rule_list[] = $rule['id_cart_rule'];
-                        }
-                        foreach ($cart_rules as $rule) {
-                            if (!in_array($rule['id_cart_rule'], $rule_list)) {
-                                $this->ajax_refresh = true;
-                                break;
-                            }
-                        }
-                    } else {
-                        $available_cart_rules2 = CartRule::getCustomerCartRules($this->context->language->id, (isset($this->context->customer->id) ? $this->context->customer->id : 0), true, true, true, $this->context->cart, false, true);
-                        if (count($available_cart_rules2) != count($available_cart_rules)) {
-                            $this->ajax_refresh = true;
-                        } elseif (count($available_cart_rules2)) {
-                            $rule_list = array();
-                            foreach ($available_cart_rules2 as $rule) {
-                                $rule_list[] = $rule['id_cart_rule'];
-                            }
-                            foreach ($cart_rules2 as $rule) {
-                                if (!in_array($rule['id_cart_rule'], $rule_list)) {
-                                    $this->ajax_refresh = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
+                //$cart_rules = $this->context->cart->getCartRules();
+                //$available_cart_rules = CartRule::getCustomerCartRules($this->context->language->id, (isset($this->context->customer->id) ? $this->context->customer->id : 0), true, true, true, $this->context->cart, false, true);
+                $update_quantity = $this->context->cart->updateQty($this->qty, $this->id_service_product);
+//                 if ($update_quantity < 0) {
+//                     // If product has attribute, minimal quantity is set with minimal quantity of attribute
+//                     $minimal_quantity = 1;
+//                     $this->errors[] = sprintf(Tools::displayError('You must add %d minimum quantity', !Tools::getValue('ajax')), $minimal_quantity);
+//                 } elseif (!$update_quantity) {
+//                     $this->errors[] = Tools::displayError('You already have the maximum quantity available for this product.', !Tools::getValue('ajax'));
+//                 } elseif ((int)Tools::getValue('allow_refresh')) {
+//                     // If the cart rules has changed, we need to refresh the whole cart
+//                     $cart_rules2 = $this->context->cart->getCartRules();
+//                     if (count($cart_rules2) != count($cart_rules)) {
+//                         $this->ajax_refresh = true;
+//                     } elseif (count($cart_rules2)) {
+//                         $rule_list = array();
+//                         foreach ($cart_rules2 as $rule) {
+//                             $rule_list[] = $rule['id_cart_rule'];
+//                         }
+//                         foreach ($cart_rules as $rule) {
+//                             if (!in_array($rule['id_cart_rule'], $rule_list)) {
+//                                 $this->ajax_refresh = true;
+//                                 break;
+//                             }
+//                         }
+//                     } else {
+//                         $available_cart_rules2 = CartRule::getCustomerCartRules($this->context->language->id, (isset($this->context->customer->id) ? $this->context->customer->id : 0), true, true, true, $this->context->cart, false, true);
+//                         if (count($available_cart_rules2) != count($available_cart_rules)) {
+//                             $this->ajax_refresh = true;
+//                         } elseif (count($available_cart_rules2)) {
+//                             $rule_list = array();
+//                             foreach ($available_cart_rules2 as $rule) {
+//                                 $rule_list[] = $rule['id_cart_rule'];
+//                             }
+//                             foreach ($cart_rules2 as $rule) {
+//                                 if (!in_array($rule['id_cart_rule'], $rule_list)) {
+//                                     $this->ajax_refresh = true;
+//                                     break;
+//                                 }
+//                             }
+//                         }
+//                     }
+//                 }
             }
         }
 
-        $removed = CartRule::autoRemoveFromCart();
-        CartRule::autoAddToCart();
-        if (count($removed) && (int)Tools::getValue('allow_refresh')) {
-            $this->ajax_refresh = true;
-        }
+        //$removed = CartRule::autoRemoveFromCart();
+        //CartRule::autoAddToCart();
+        //if (count($removed) && (int)Tools::getValue('allow_refresh')) {
+        //    $this->ajax_refresh = true;
+        //}
     }
 
     /**
