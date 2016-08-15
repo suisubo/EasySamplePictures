@@ -28,9 +28,9 @@ class OrderControllerCore extends ParentOrderController
 {
     public $step;
     const STEP_SUMMARY_EMPTY_CART = -1;
-    const STEP_ADDRESSES = 1;
-    const STEP_DELIVERY = 2;
-    const STEP_PAYMENT = 3;
+    //const STEP_ADDRESSES = 1;
+    //const STEP_DELIVERY = 2;
+    const STEP_PAYMENT = 1;
 
     /**
      * Initialize order controller
@@ -160,39 +160,18 @@ class OrderControllerCore extends ParentOrderController
                 $this->setTemplate(_PS_THEME_DIR_.'shopping-cart.tpl');
             break;
 
-            case OrderController::STEP_ADDRESSES:
-                $this->_assignAddress();
-                $this->processAddressFormat();
-                if (Tools::getValue('multi-shipping') == 1) {
-                    $this->_assignSummaryInformations();
-                    $this->context->smarty->assign('product_list', $this->context->cart->getProducts());
-                    $this->setTemplate(_PS_THEME_DIR_.'order-address-multishipping.tpl');
-                } else {
-                    $this->setTemplate(_PS_THEME_DIR_.'order-address.tpl');
-                }
-            break;
-
-            case OrderController::STEP_DELIVERY:
-                if (Tools::isSubmit('processAddress')) {
-                    $this->processAddress();
-                }
-                $this->autoStep();
-                $this->_assignCarrier();
-                $this->setTemplate(_PS_THEME_DIR_.'order-carrier.tpl');
-            break;
-
             case OrderController::STEP_PAYMENT:
                 // Check that the conditions (so active) were accepted by the customer
-                $cgv = Tools::getValue('cgv') || $this->context->cookie->check_cgv;
+//                 $cgv = Tools::getValue('cgv') || $this->context->cookie->check_cgv;
 
-                if ($is_advanced_payment_api === false && Configuration::get('PS_CONDITIONS')
-                    && (!Validate::isBool($cgv) || $cgv == false)) {
-                    Tools::redirect('index.php?controller=order&step=2');
-                }
+//                 if ($is_advanced_payment_api === false && Configuration::get('PS_CONDITIONS')
+//                     && (!Validate::isBool($cgv) || $cgv == false)) {
+//                     Tools::redirect('index.php?controller=order&step=2');
+//                 }
 
-                if ($is_advanced_payment_api === false) {
-                    Context::getContext()->cookie->check_cgv = true;
-                }
+//                 if ($is_advanced_payment_api === false) {
+//                     Context::getContext()->cookie->check_cgv = true;
+//                 }
 
                 // Check the delivery option is set
                 if ($this->context->cart->isVirtualCart() === false) {
@@ -442,7 +421,7 @@ class OrderControllerCore extends ParentOrderController
         global $orderTotal;
 
         // Redirect instead of displaying payment modules if any module are grefted on
-        Hook::exec('displayBeforePayment', array('module' => 'order.php?step=3'));
+        Hook::exec('displayBeforePayment', array('module' => 'order.php?step=1'));
 
         /* We may need to display an order summary */
         $this->context->smarty->assign($this->context->cart->getSummaryDetails());

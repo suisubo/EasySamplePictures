@@ -125,7 +125,7 @@ class CartControllerCore extends FrontController
             $this->errors[] = Tools::displayError('Product not found', !Tools::getValue('ajax'));
         }
 
-        $serviceproduct = new ServiceProduct($this->id_product, true, $this->context->language->id);
+        $serviceproduct = new ServiceProduct($this->id_service_product, true, $this->context->language->id);
         
         // If no errors, process product addition
         if (!$this->errors && $mode == 'add') {
@@ -193,6 +193,8 @@ class CartControllerCore extends FrontController
         //if (count($removed) && (int)Tools::getValue('allow_refresh')) {
         //    $this->ajax_refresh = true;
         //}
+        
+        //$this->ajax_refresh = true;
     }
 
     /**
@@ -234,41 +236,17 @@ class CartControllerCore extends FrontController
 
         if (Tools::getIsset('summary')) {
             $result = array();
-            if (Configuration::get('PS_ORDER_PROCESS_TYPE') == 1) {
-                $groups = (Validate::isLoadedObject($this->context->customer)) ? $this->context->customer->getGroups() : array(1);
-                if ($this->context->cart->id_address_delivery) {
-                    $deliveryAddress = new Address($this->context->cart->id_address_delivery);
-                }
-                $id_country = (isset($deliveryAddress) && $deliveryAddress->id) ? (int)$deliveryAddress->id_country : (int)Tools::getCountry();
-
-                Cart::addExtraCarriers($result);
-            }
+            
             $result['summary'] = $this->context->cart->getSummaryDetails(null, true);
-            $result['customizedDatas'] = Product::getAllCustomizedDatas($this->context->cart->id, null, true);
-            $result['HOOK_SHOPPING_CART'] = Hook::exec('displayShoppingCartFooter', $result['summary']);
-            $result['HOOK_SHOPPING_CART_EXTRA'] = Hook::exec('displayShoppingCart', $result['summary']);
-
-            foreach ($result['summary']['products'] as $key => &$product) {
-                $product['quantity_without_customization'] = $product['quantity'];
-                if ($result['customizedDatas'] && isset($result['customizedDatas'][(int)$product['id_product']][(int)$product['id_product_attribute']])) {
-                    foreach ($result['customizedDatas'][(int)$product['id_product']][(int)$product['id_product_attribute']] as $addresses) {
-                        foreach ($addresses as $customization) {
-                            $product['quantity_without_customization'] -= (int)$customization['quantity'];
-                        }
-                    }
-                }
-            }
-            if ($result['customizedDatas']) {
-                Product::addCustomizationPrice($result['summary']['products'], $result['customizedDatas']);
-            }
-
-            $json = '';
-            Hook::exec('actionCartListOverride', array('summary' => $result, 'json' => &$json));
+            $json = "";
             $this->ajaxDie(Tools::jsonEncode(array_merge($result, (array)Tools::jsonDecode($json, true))));
         }
         // @todo create a hook
         elseif (file_exists(_PS_MODULE_DIR_.'/blockcart/blockcart-ajax.php')) {
-            require_once(_PS_MODULE_DIR_.'/blockcart/blockcart-ajax.php');
+            //require_once(_PS_MODULE_DIR_.'/blockcart/blockcart-ajax.php');
+        	$context = Context::getContext();
+        	$blockCart = Module::getInstanceByName('blockcart');
+        	echo $blockCart->hookAjaxCall(array('cookie' => $context->cookie, 'cart' => $context->cart));
         }
     }
 }

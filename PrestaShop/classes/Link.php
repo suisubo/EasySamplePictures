@@ -98,10 +98,10 @@ class LinkCore
         $url = $this->getBaseLink($id_shop, null, $relative_protocol).$this->getLangLink($id_lang, null, $id_shop);
 
         if (!is_object($product)) {
-            if (is_array($product) && isset($product['id_product'])) {
-                $product = new Product($product['id_product'], false, $id_lang, $id_shop);
+            if (is_array($product) && isset($product['id_service_product'])) {
+                $product = new ServiceProduct($product['id_service_product'], false, $id_lang, $id_shop);
             } elseif ((int)$product) {
-                $product = new Product((int)$product, false, $id_lang, $id_shop);
+                $product = new ServiceProduct((int)$product, false, $id_lang, $id_shop);
             } else {
                 throw new PrestaShopException('Invalid product vars');
             }
@@ -112,48 +112,7 @@ class LinkCore
         $params['id'] = $product->id;
         $params['rewrite'] = (!$alias) ? $product->getFieldByLang('link_rewrite') : $alias;
 
-        $params['ean13'] = (!$ean13) ? $product->ean13 : $ean13;
-        $params['meta_keywords'] =    Tools::str2url($product->getFieldByLang('meta_keywords'));
-        $params['meta_title'] = Tools::str2url($product->getFieldByLang('meta_title'));
-
-        if ($dispatcher->hasKeyword('product_rule', $id_lang, 'manufacturer', $id_shop)) {
-            $params['manufacturer'] = Tools::str2url($product->isFullyLoaded ? $product->manufacturer_name : Manufacturer::getNameById($product->id_manufacturer));
-        }
-
-        if ($dispatcher->hasKeyword('product_rule', $id_lang, 'supplier', $id_shop)) {
-            $params['supplier'] = Tools::str2url($product->isFullyLoaded ? $product->supplier_name : Supplier::getNameById($product->id_supplier));
-        }
-
-        if ($dispatcher->hasKeyword('product_rule', $id_lang, 'price', $id_shop)) {
-            $params['price'] = $product->isFullyLoaded ? $product->price : Product::getPriceStatic($product->id, false, null, 6, null, false, true, 1, false, null, null, null, $product->specificPrice);
-        }
-
-        if ($dispatcher->hasKeyword('product_rule', $id_lang, 'tags', $id_shop)) {
-            $params['tags'] = Tools::str2url($product->getTags($id_lang));
-        }
-
-        if ($dispatcher->hasKeyword('product_rule', $id_lang, 'category', $id_shop)) {
-            $params['category'] = (!is_null($product->category) && !empty($product->category)) ? Tools::str2url($product->category) : Tools::str2url($category);
-        }
-
-        if ($dispatcher->hasKeyword('product_rule', $id_lang, 'reference', $id_shop)) {
-            $params['reference'] = Tools::str2url($product->reference);
-        }
-
-        if ($dispatcher->hasKeyword('product_rule', $id_lang, 'categories', $id_shop)) {
-            $params['category'] = (!$category) ? $product->category : $category;
-            $cats = array();
-            foreach ($product->getParentCategories($id_lang) as $cat) {
-                if (!in_array($cat['id_category'], Link::$category_disable_rewrite)) {
-                    //remove root and home category from the URL
-                    $cats[] = $cat['link_rewrite'];
-                }
-            }
-            $params['categories'] = implode('/', $cats);
-        }
-        $anchor = $ipa ? $product->getAnchor((int)$ipa, (bool)$add_anchor) : '';
-
-        return $url.$dispatcher->createUrl('product_rule', $id_lang, $params, $force_routes, $anchor, $id_shop);
+        return $url.$dispatcher->createUrl('product_rule', $id_lang, $params, $force_routes, '', $id_shop);
     }
     
     public function getServiceProductLink($serviceproduct, $alias = null, $id_lang = null, $id_shop = null, $ipa = 0, $force_routes = false, $relative_protocol = false, $add_anchor = false)

@@ -605,7 +605,7 @@ function upQuantity(id, qty)
 			+ '&add=true'
 			+ '&getproductprice=true'
 			+ '&summary=true'
-			+ '&id_product=' + productId
+			+ '&id_service_product=' + productId
 			+ '&ipa=' + productAttributeId
 			+ '&id_address_delivery=' + id_address_delivery
 			+ ((customizationId !== 0) ? '&id_customization=' + customizationId : '')
@@ -716,7 +716,7 @@ function downQuantity(id, qty)
 				+ '&add=true'
 				+ '&getproductprice=true'
 				+ '&summary=true'
-				+ '&id_product='+productId
+				+ '&id_service_product='+productId
 				+ '&ipa='+productAttributeId
 				+ '&id_address_delivery='+id_address_delivery
 				+ '&op=down'
