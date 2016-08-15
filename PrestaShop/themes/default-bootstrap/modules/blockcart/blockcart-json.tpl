@@ -37,6 +37,7 @@
 		"priceByLine": {displayWtPrice|json_encode p=$product.total},
 		"name": {$product.name|trim|html_entity_decode:2:'UTF-8'|json_encode},
 		"price": {displayWtPrice|json_encode p=$product.total},
+		"idCombination": 0,
 		"price_float": {$product.total|floatval|json_encode}		
 	{rdelim}{if !$smarty.foreach.products.last},{/if}
 {/foreach}{/if}
