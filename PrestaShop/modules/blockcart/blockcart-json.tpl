@@ -36,7 +36,8 @@
 		"image":         "{$link->getImageLink($product.link_rewrite, $product.id_image, 'home_default')|addslashes|replace:'\\\'':'\''}",		
 		"name":          "{$product.name|html_entity_decode:2:'UTF-8'|truncate:15:'...':true|escape:'html'}",
 		"price":         "{$product.total}",
-		"price_float":   "{$product.total}",		
+		"idCombination": 0,
+		"price_float":   "{$product.total}"		
 	{rdelim}{if !$smarty.foreach.products.last},{/if}
 {/foreach}{/if}
 ],
