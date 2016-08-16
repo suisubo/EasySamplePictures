@@ -690,9 +690,8 @@ class CartCore extends ObjectModel
 //                 true,
 //                 $cart_shop_context
 //             );
-			
-            
-            $row['total'] = $row['price'] * (int)$row['cart_quantity'];
+            $row['price'] = (float) $row['price'];            
+            $row['total'] = (float) ($row['price'] * (int)$row['cart_quantity']);
 //             switch (Configuration::get('PS_ROUND_TYPE')) {
 //                 case Order::ROUND_TOTAL:
 //                     $row['total'] = $row['price_with_reduction_without_tax'] * (int)$row['cart_quantity'];

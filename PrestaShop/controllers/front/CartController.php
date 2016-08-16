@@ -239,6 +239,7 @@ class CartControllerCore extends FrontController
             
             $result['summary'] = $this->context->cart->getSummaryDetails(null, true);
             $json = "";
+            Hook::exec('actionCartListOverride', array('summary' => $result, 'json' => &$json));
             $this->ajaxDie(Tools::jsonEncode(array_merge($result, (array)Tools::jsonDecode($json, true))));
         }
         // @todo create a hook
