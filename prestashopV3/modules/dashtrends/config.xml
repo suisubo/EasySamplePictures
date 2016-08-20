@@ -3,7 +3,7 @@
 	<name>dashtrends</name>
 	<displayName><![CDATA[Dashboard Trends]]></displayName>
 	<version><![CDATA[0.8.1]]></version>
-	<description><![CDATA[Adds a block whith the evolution of your stores main numbers along with a graphic.]]></description>
+	<description><![CDATA[Adds a block with a graphical representation of the development of your store(s) based on selected key data.]]></description>
 	<author><![CDATA[PrestaShop]]></author>
 	<tab><![CDATA[dashboard]]></tab>
 	<is_configurable>0</is_configurable>

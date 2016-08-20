@@ -3,7 +3,7 @@
 	<name>pagesnotfound</name>
 	<displayName><![CDATA[Pages not found]]></displayName>
 	<version><![CDATA[1.5.0]]></version>
-	<description><![CDATA[Displays the pages requested by your visitors that have not been found.]]></description>
+	<description><![CDATA[Adds a tab to the Stats dashboard, showing the pages requested by your visitors that have not been found.]]></description>
 	<author><![CDATA[PrestaShop]]></author>
 	<tab><![CDATA[analytics_stats]]></tab>
 	<is_configurable>0</is_configurable>
