@@ -87,7 +87,7 @@ class BlockServiceProducts extends Module
 	protected function getServiceProducts()
 	{
 		$serviceProducts = false;
-		$serviceProducts = Product::getProducts((int) $this->context->language->id, 0, 0, 'id_product', 'ASC');
+		$serviceProducts = Product::getAllServiceProducts((int) $this->context->language->id);
 
 		if (!$serviceProducts && Configuration::get('PS_BLOCK_SERVICEPRODUCTS_DISPLAY'))
 			return;
