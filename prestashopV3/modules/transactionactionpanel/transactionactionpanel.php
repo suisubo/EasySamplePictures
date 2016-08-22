@@ -96,7 +96,15 @@ class transactionactionpanel extends Module
 			}			
 		}
 		
-		
-		return true;
+		if(isset($transactions_ui))
+		{
+			$this->smarty->assign(array(
+					'transactions' => $transactions_ui
+			));			
+			
+			return $this->display(__FILE__, 'transactionactionpanel.tpl', $this->getCacheId('transactionactionpanel.tpl'));
+		}else {
+			return '';
+		}		
 	}
 }	
