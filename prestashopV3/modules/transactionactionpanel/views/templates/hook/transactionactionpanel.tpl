@@ -24,8 +24,39 @@
 *}
 
 <!-- MODULE Block service products -->
-<div id="transation_action_panel" class="transation_action_panel">
-	<h4 class="title_block">{l s='Transaction Panel' mod='transactionactionpanel'}</h4>
+<div id="transation_action_panel" class="transation_action_panel">	
+	{foreach from=$transactions item=transaction name=transactions}
+	    <div id="transation_block_{$transaction['id_transaction']}" class="transation_block">	
+		<h4 class="transaction_block">{$transaction['id_transaction']}</h4>
+		<form action="TransactionActionPanelController.php" id="transation_form_{$transaction['id_transaction']}">
+		<input type="hidden" name="fc" value="module">
+		<input type="hidden" name="module" value="transactionactionpanel">
+		<input type="hidden" name="transaction_id" value="{$transaction['id_transaction']}">
+		<input type="hidden" name="current_step" value="{$transaction['current_step']}">
+		<table id = transation_input_{$transaction['id_transaction']}" class="transaction_input">		
+		{foreach from=$transaction.ui_list item=ui_item name=ui_list}		
+			<tr class="item">
+				{if $ui_item.ui_element_type == "text"}
+				    <td class="bold">
+					    <label>{$ui_item.ui_element_label}</label>
+				    </td>
+				    <td>					    
+					    <input type="text" name="{$ui_item.ui_element_name}">
+				    </td>
+				{/if}
+				{if $ui_item.ui_element_type == "submit"}
+				    <td>					    
+					    <input class="transactionactionpanel_submit" id="transation_submit_{$transaction['id_transaction']}" type="submit" name="{$ui_item.ui_element_name}" value="{$ui_item.ui_element_label}">
+				    </td>
+				{/if}
+			</tr>
+		{/foreach}
+		</table>
+		</form>
+		</div>
+	{/foreach}
+	
+	
 <!-- 	<div class="block_content"> -->
 <!-- 	{if $service_products !== false} -->
 <!-- 		<ul class="product_images clearfix"> -->

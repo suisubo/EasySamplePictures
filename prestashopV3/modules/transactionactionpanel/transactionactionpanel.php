@@ -25,6 +25,7 @@ class transactionactionpanel extends Module
 	{
 		$success = (parent::install()
 			&& $this->registerHook('displayOrderDetail')
+			&& $this->registerHook('header')
 		);
 
 		$this->_clearCache('*');
@@ -37,6 +38,11 @@ class transactionactionpanel extends Module
 		if (!parent::uninstall())
 			return false;
 			return true;
+	}
+	
+	public function hookHeader($params)
+	{
+		$this->context->controller->addJS($this->_path.'views/js/transactionactionpanel.js');
 	}
 	
 	public function hookdisplayOrderDetail($params)
@@ -82,11 +88,12 @@ class transactionactionpanel extends Module
 		
 					if($action_partner == 0)
 					{
-						$sql = 'select * from '._DB_PREFIX_.'z_step_type_ui where id_step_type = '.$id_step_type;
+						$sql = 'select * from '._DB_PREFIX_.'z_step_type_ui where id_step_type = '.$id_step_type.' order by sequence';
 							
 						$step_ui = $db->ExecuteS($sql);
 						
 						$transactions_ui[] = array("id_transaction" => $transaction['id_transaction'],
+								"current_step" => $transaction['current_step'],
 								"instruction" => $instruction,
 								"description" => $description,
 								"ui_list" => $step_ui);
