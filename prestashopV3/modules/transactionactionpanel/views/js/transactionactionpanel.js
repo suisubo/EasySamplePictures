@@ -23,11 +23,46 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-$(document).ready(function(){
-	$('.transactionactionpanel_submit').off('click').on('click', function(e){
-		e.preventDefault();
-		var inputs = this.closest("form").getElementsByTagName("input");		
-	});	
-});
+//function submit_transaction_panel_inputs() {	
+//	var parent_form = $(this).closest("form");
+//	var inputs = $(parent_form).getElementsByTagName("input");	
+//	var x = document.getElementsByName('form_name');
+//}	
 
+$(document).ready(function(){
+	$(document).off('click', '.transactionactionpanel_submit').on('click', '.transactionactionpanel_submit', function(e){
+		e.preventDefault();	
+		var parent_form = $(e.target).closest("form");
+		var inputs = $(parent_form).find("input");
+		
+		var post_data = 'controller=ProcessAction'
+			           +'&ajax=true'
+			           +'&fc=module'
+			           +'&module=transactionactionpanel'
+			           +'&ajax=true'
+		
+		$.each(inputs, function (index){
+			var name = $(this).attr("name");
+			var value = $(this).attr("value");
+			var type = $(this).attr("type");
+			
+			if(type != "submit")
+				post_data = post_data + '&' + name + '=' + value 
+		});
+		
+		$.ajax({
+			type: 'POST',
+			headers: { "cache-control": "no-cache" },
+			url: baseUri + 'index.php?rand=' + new Date().getTime(),
+			async: true,
+			cache: false,
+			dataType: 'json',
+			data: post_data,
+			success: function(jsonData)
+			{
+				
+			}});
+
+	});
+});
 

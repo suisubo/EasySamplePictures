@@ -24,15 +24,23 @@
 *}
 
 <!-- MODULE Block service products -->
-<div id="transation_action_panel" class="transation_action_panel">	
-	{foreach from=$transactions item=transaction name=transactions}
+
+
 	    <div id="transation_block_{$transaction['id_transaction']}" class="transation_block">	
 		<h4 class="transaction_block">{$transaction['id_transaction']}</h4>
-		<form action="TransactionActionPanelController.php" id="transation_form_{$transaction['id_transaction']}">
-		<input type="hidden" name="fc" value="module">
-		<input type="hidden" name="module" value="transactionactionpanel">
+		<form id="transation_form_{$transaction['id_transaction']}" action="transactionactionpanel.php" method="POST">		
 		<input type="hidden" name="transaction_id" value="{$transaction['id_transaction']}">
 		<input type="hidden" name="current_step" value="{$transaction['current_step']}">
+		<input type="hidden" name="stephandler" value="{$transaction['stephandler']}">
+		<input type="hidden" name="steptype" value="{$transaction['steptype']}">
+		<input type="hidden" name="servicetype" value="{$transaction['servicetype']}">
+		<br>
+		{description}
+		<br>
+		{status_string}
+		<br>
+		{instruction}
+		<br>
 		<table id = transation_input_{$transaction['id_transaction']}" class="transaction_input">		
 		{foreach from=$transaction.ui_list item=ui_item name=ui_list}		
 			<tr class="item">
@@ -46,7 +54,7 @@
 				{/if}
 				{if $ui_item.ui_element_type == "submit"}
 				    <td>					    
-					    <input class="transactionactionpanel_submit" id="transation_submit_{$transaction['id_transaction']}" type="submit" name="{$ui_item.ui_element_name}" value="{$ui_item.ui_element_label}">
+					    <input onclick="submit_transaction_panel_inputs()" class="transactionactionpanel_submit" id="transation_submit_{$transaction['id_transaction']}" type="submit" name="{$ui_item.ui_element_name}" value="{$ui_item.ui_element_label}">
 				    </td>
 				{/if}
 			</tr>
@@ -54,7 +62,7 @@
 		</table>
 		</form>
 		</div>
-	{/foreach}
+
 	
 	
 <!-- 	<div class="block_content"> -->
@@ -77,5 +85,5 @@
 <!-- 		<p>&raquo; {l s='Do not allow service products at this time.' mod='blockserviceproducts'}</p> -->
 <!-- 	{/if} -->
 <!-- 	</div> -->
-</div>
+
 <!-- /MODULE Block service products -->
