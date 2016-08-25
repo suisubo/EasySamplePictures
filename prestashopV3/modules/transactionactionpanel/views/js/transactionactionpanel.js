@@ -46,6 +46,9 @@ $(document).ready(function(){
 			var value = $(this).attr("value");
 			var type = $(this).attr("type");
 			
+			if(name == "transaction_id")
+				var transaction_id = value;
+			
 			if(type != "submit")
 				post_data = post_data + '&' + name + '=' + value 
 		});
@@ -56,11 +59,11 @@ $(document).ready(function(){
 			url: baseUri + 'index.php?rand=' + new Date().getTime(),
 			async: true,
 			cache: false,
-			dataType: 'json',
+			dataType: 'xml',
 			data: post_data,
-			success: function(jsonData)
+			success: function(data)
 			{
-				
+				$("#transation_block_" + transaction_id).replaceWith(data);
 			}});
 
 	});

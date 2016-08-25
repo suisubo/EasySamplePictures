@@ -47,6 +47,8 @@ class transactionactionpanel extends Module
 	
 	public function displayTransactionDetail($transaction)
 	{
+		$db = Db::getInstance();
+		
 		$id_product = $transaction["id_product"];
 		$sql = 'select * from '._DB_PREFIX_.'z_service_product where id_product = '.$id_product;
 			
@@ -74,55 +76,59 @@ class transactionactionpanel extends Module
 				$instruction = $service_step["instruction"];
 				$description = $service_step["description"];
 
-				if($action_partner == 0)
-				{
-					$sql = 'select * from '._DB_PREFIX_.'z_transaction_context where id_transaction = '.$transaction['id_transaction'].
-					$context = $db->ExecuteS($sql);
-					
-					$sql = 'select * from '._DB_PREFIX_.'z_service_step_mapping where id_step_type = '.$id_step_type
-					.' and id_service_type = '.$servie_product['id_service_type'].' id_step = '.$transaction['current_step'].' and direction = 0';
-					
-					$mappings = $db->ExecuteS($sql);
-					foreach($mappings as $mapping)
-					{
-						$context_param_value = $context[$mapping['context_para_name']];
-						if($context_param_value != null)
-						{
-							$local_params[$mapping['local_para_name']] = $context_param_value;
-						}
-					}
-					
-					$statusstring = $handler->getReadableStatusString($local_params);
-					
-					
-					$sql = 'select * from '._DB_PREFIX_.'z_step_type_ui where id_step_type = '.$id_step_type.' order by sequence';
-						
-					$step_ui = $db->ExecuteS($sql);
 
-					$sql = 'select * from '._DB_PREFIX_.'z_step_type where id_step_type = '.$id_step_type;
-					$step_types = $db->ExecuteS($sql);
-					if(count($step_types) == 1)
+				$sql = 'select * from '._DB_PREFIX_.'z_step_type where id_step_type = '.$id_step_type;
+				$step_types = $db->ExecuteS($sql);
+				
+				$sql = 'select * from '._DB_PREFIX_.'z_transaction_context where id_transaction = '.$transaction['id_transaction'].
+				$context = $db->ExecuteS($sql);
+				
+				$sql = 'select * from '._DB_PREFIX_.'z_service_step_mapping where id_step_type = '.$id_step_type
+				.' and id_service_type = '.$servie_product['id_service_type'].' id_step = '.$transaction['current_step'].' and direction = 0';
+				
+				$mappings = $db->ExecuteS($sql);
+				foreach($mappings as $mapping)
+				{
+					$context_param_value = $context[$mapping['context_para_name']];
+					if($context_param_value != null)
 					{
-						$transactions_ui = array("id_transaction" => $transaction['id_transaction'],
-								"current_step" => $transaction['current_step'],
-								"instruction" => $instruction,
-								"servicetype" => $servie_product['id_service_type'],
-								"description" => $description,
-								"steptype" => $id_step_type,
-								"stephandler" => $step_types[0]["step_handler"],
-								"ui_list" => $step_ui,
-								"status_string" => $$statusstring
-						);
+						$local_params[$mapping['local_para_name']] = $context_param_value;
 					}
 				}
-
+				$handler_class = $step_types[0]["step_handler"];
+				$handler = new $handler_class();
+				$statusstring = $handler->getReadableStatusString($local_params);
+				
+				
+				$sql = 'select * from '._DB_PREFIX_.'z_step_type_ui where id_step_type = '.$id_step_type.' order by sequence';
+				$step_ui = $db->ExecuteS($sql);
+				
+				if($action_partner == 1)
+				{
+					$step_ui = null;
+					$instruction = null;						
+				}
+				
+				if(count($step_types) == 1)
+				{
+					$transactions_ui = array("id_transaction" => $transaction['id_transaction'],
+							"current_step" => $transaction['current_step'],
+							"instruction" => $instruction,
+							"servicetype" => $servie_product['id_service_type'],
+							"description" => $description,
+							"steptype" => $id_step_type,
+							"stephandler" => $step_types[0]["step_handler"],
+							"ui_list" => $step_ui,
+							"status_string" => $statusstring
+					);
+				}
 			}
 		}
 		
 		if($transactions_ui != null)
 		{
 			$this->smarty->assign(array(
-					'transactions' => $transactions_ui
+					'transaction' => $transactions_ui
 			));
 			
 			return $this->display(__FILE__, 'transactionactionpanel.tpl', $this->getCacheId('transactionactionpanel.tpl'));
@@ -150,7 +156,8 @@ class transactionactionpanel extends Module
 		//get all transactions linked to the order, it will also be linked to corresponding product
 		foreach ($transactions as $transaction)		
 		{
-			$output = $output.displayTransactionDetail($transactions);
+			$transaction_content = $this->displayTransactionDetail($transaction);
+			$output = $output.$transaction_content;
 		}
 		
 		return $output = $output."</div>";

@@ -30,6 +30,8 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 	
 	public function displayAjax()
 	{
+		$db = Db::getInstance();
+		
 		$handler_class = Tools::getValue("stephandler");
 		$handler = new $handler_class();
 		
@@ -39,11 +41,11 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 		$steptype = Tools::getValue("steptype");
 		
 		
-		$sql = 'select * from '._DB_PREFIX_.'z_transaction_context where id_transaction = '.$transaction_id.
+		$sql = 'select * from '._DB_PREFIX_.'z_transaction_context where id_transaction = "'.$transaction_id.'"';
 		$context = $db->ExecuteS($sql);
 		
 		$sql = 'select * from '._DB_PREFIX_.'z_service_step_mapping where id_step_type = '.$steptype
-		       .' and id_service_type = '.$service_type.' id_step = '.$current_step.' and direction = 0';
+		       .' and id_service_type = '.$service_type.' and id_step = '.$current_step.' and direction = 0';
 		
 		$mappings = $db->ExecuteS($sql);
 		foreach($mappings as $mapping)
@@ -57,10 +59,10 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 		
 		$return = $handler->processUIInputs($local_params, $output, $errorinfo);
 		
-		if($return == AbstractHandler::SUCCESS)
+		if($return == AbstractHandler::PROCESS_SUCCESS)
 		{
 			$sql = 'select * from '._DB_PREFIX_.'z_service_step_mapping where id_step_type = '.$steptype
-			.' and id_service_type = '.$service_type.' id_step = '.$current_step.' and direction = 1';
+			.' and id_service_type = '.$service_type.' and id_step = '.$current_step.' and direction = 1';
 			
 			$mappings = $db->ExecuteS($sql);
 			
@@ -84,16 +86,17 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 			{
 				$nextstep = $nextsteps[0]['next_step_id'];
 				
-				$sql = "update table "._DB_PREFIX_."z_transaction set current_step = '".$nextstep."' where id_transaction = '".$transaction_id."'";
+				$sql = "update "._DB_PREFIX_."z_transaction set current_step = '".$nextstep."' where id_transaction = '".$transaction_id."'";
 				$db->ExecuteS($sql);
 				
-				$sql = 'select * from '._DB_PREFIX_.'z_transaction where id_transaction = '.$transaction_id;
+				$sql = 'select * from '._DB_PREFIX_.'z_transaction where id_transaction = "'.$transaction_id.'"';
 				$transactions = $db->ExecuteS($sql);
 				
 				if($transactions != null && count($transactions) == 1)
 				{
 					$moduleInstance = Module::getInstanceByName('transactionactionpanel');
-					return $moduleInstance->displayTransactionDetail($transactions);
+					$transacton = $transactions[0];
+					return $moduleInstance->displayTransactionDetail($transacton);
 				}
 			}
 		}

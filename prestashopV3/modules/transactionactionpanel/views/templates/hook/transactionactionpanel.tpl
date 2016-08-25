@@ -28,37 +28,39 @@
 
 	    <div id="transation_block_{$transaction['id_transaction']}" class="transation_block">	
 		<h4 class="transaction_block">{$transaction['id_transaction']}</h4>
-		<form id="transation_form_{$transaction['id_transaction']}" action="transactionactionpanel.php" method="POST">		
+		<form id="transation_form_{$transaction['id_transaction']}" action="#" method="POST">		
 		<input type="hidden" name="transaction_id" value="{$transaction['id_transaction']}">
 		<input type="hidden" name="current_step" value="{$transaction['current_step']}">
 		<input type="hidden" name="stephandler" value="{$transaction['stephandler']}">
 		<input type="hidden" name="steptype" value="{$transaction['steptype']}">
 		<input type="hidden" name="servicetype" value="{$transaction['servicetype']}">
 		<br>
-		{description}
+		{$transaction['description']}
 		<br>
-		{status_string}
+		{$transaction['status_string']}
 		<br>
-		{instruction}
+		{$transaction['instruction']}
 		<br>
-		<table id = transation_input_{$transaction['id_transaction']}" class="transaction_input">		
-		{foreach from=$transaction.ui_list item=ui_item name=ui_list}		
-			<tr class="item">
-				{if $ui_item.ui_element_type == "text"}
-				    <td class="bold">
-					    <label>{$ui_item.ui_element_label}</label>
-				    </td>
-				    <td>					    
-					    <input type="text" name="{$ui_item.ui_element_name}">
-				    </td>
-				{/if}
-				{if $ui_item.ui_element_type == "submit"}
-				    <td>					    
-					    <input onclick="submit_transaction_panel_inputs()" class="transactionactionpanel_submit" id="transation_submit_{$transaction['id_transaction']}" type="submit" name="{$ui_item.ui_element_name}" value="{$ui_item.ui_element_label}">
-				    </td>
-				{/if}
-			</tr>
-		{/foreach}
+		<table id = transation_input_{$transaction['id_transaction']}" class="transaction_input">
+		{if isset($transaction.ui_list)}		
+			{foreach from=$transaction.ui_list item=ui_item name=ui_list}		
+				<tr class="item">
+					{if $ui_item.ui_element_type == "text"}
+				   		<td class="bold">
+					    	<label>{$ui_item.ui_element_label}</label>
+				    	</td>
+				    	<td>					    
+					    	<input type="text" name="{$ui_item.ui_element_name}">
+				    	</td>
+					{/if}
+					{if $ui_item.ui_element_type == "submit"}
+				    	<td>					    
+					    	<input onclick="submit_transaction_panel_inputs()" class="transactionactionpanel_submit" id="transation_submit_{$transaction['id_transaction']}" type="submit" name="{$ui_item.ui_element_name}" value="{$ui_item.ui_element_label}">
+				    	</td>
+					{/if}
+				</tr>
+			{/foreach}
+		{/if}
 		</table>
 		</form>
 		</div>
