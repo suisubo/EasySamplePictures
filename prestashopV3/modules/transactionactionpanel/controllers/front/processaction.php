@@ -39,6 +39,7 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 		$transaction_id = Tools::getValue("transaction_id");
 		$current_step = Tools::getValue("current_step");
 		$steptype = Tools::getValue("steptype");
+		$id_product = Tools::getValue("id_product");
 		
 		
 		$sql = 'select * from '._DB_PREFIX_.'z_transaction_context where id_transaction = "'.$transaction_id.'"';
@@ -57,7 +58,12 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 			}
 		}
 		
-		$return = $handler->processUIInputs($local_params, $output, $errorinfo);
+		$sql = 'select * from '._DB_PREFIX_.'z_product_params where id_product = '.$id_product;
+		$service_params = $db->ExecuteS($sql);
+		
+		$return = $handler->processUIInputs($local_params, $outputs, $service_params, $errorinfo);
+		
+		
 		
 		if($return == AbstractHandler::PROCESS_SUCCESS)
 		{
@@ -68,14 +74,35 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 			
 			foreach($mappings as $mapping)
 			{
-				$local_param_value = $output[$mapping['local_para_name']];
-				if($local_param_value != null)
+				if(!$mapping['regex'])
 				{
-					$context[$mapping['context_para_name']] = $local_param_value;
-					
-					$sql = "insert into "._DB_PREFIX_."z_transaction_context (id_transaction, param_name, param_value) VALUES ('"
-							.$transaction_id."', '".$mapping['context_para_name']."', '".$local_param_value."'";
-					$db->ExecuteS($sql);
+					$local_param_value = $outputs[$mapping['local_para_name']];
+					if($local_param_value != null)
+					{
+						$context[$mapping['context_para_name']] = $local_param_value;
+							
+						$sql = "insert into "._DB_PREFIX_."z_transaction_context (id_transaction, param_name, param_value) VALUES ('"
+								.$transaction_id."', '".$mapping['context_para_name']."', '".$local_param_value."') ON DUPLICATE KEY UPDATE ".
+								"param_value = '".$local_param_value."'";
+								$db->ExecuteS($sql);
+					}
+				}else{
+					foreach($outputs as $key => $value)
+					{
+						if(preg_match("/".$mapping['local_para_name']."/", $key, $maches))
+						{
+							for($i = 1; $i < count($maches); $i++)
+							{
+								$param_name = str_replace('{'.$i.'}', $maches[$i], $mapping['context_para_name']);
+								$context[$param_name] = $value;
+								
+								$sql = "insert into "._DB_PREFIX_."z_transaction_context (id_transaction, param_name, param_value) VALUES ('"
+										.$transaction_id."', '".$param_name."', '".$value."') ON DUPLICATE KEY UPDATE ".
+										"param_value = '".$value."'";
+										$db->ExecuteS($sql);
+							}
+						}
+					}
 				}
 			}
 			
@@ -96,9 +123,15 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 				{
 					$moduleInstance = Module::getInstanceByName('transactionactionpanel');
 					$transacton = $transactions[0];
-					return $moduleInstance->displayTransactionDetail($transacton);
+					
+					$ajaxReturn['next_step'] = $moduleInstance->displayTransactionDetail($transacton);
+					
+					$this->ajaxDie(Tools::jsonEncode($ajaxReturn));
 				}
 			}
+		}else{
+			$ajaxReturn['errors'] = $errorinfo;
+			$this->ajaxDie(Tools::jsonEncode($ajaxReturn));
 		}
 		
 	}

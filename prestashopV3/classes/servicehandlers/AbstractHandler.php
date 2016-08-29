@@ -8,6 +8,7 @@ abstract class AbstractHandlerCore
 	const STEP_INPUT_PARTNER_CUSTOMER = 0;
 	const STEP_INPUT_PARTNER_VENDOR = 1;	
 	
-	abstract public function processUIInputs($context_inputs, &$outputs, &$error_info);
-	abstract public function getReadableStatusString($context_inputs, $lang);
+	abstract public function processUIInputs($context_inputs, &$outputs, $service_parameters, &$error_info);
+	abstract public function getReadableStatusString($context_inputs, $service_parameters, $lang);
+	abstract public function getAdditionalUIElements($service_parameters);
 }

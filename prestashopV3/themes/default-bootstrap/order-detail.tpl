@@ -23,6 +23,30 @@
 *  International Registered Trademark & Property of PrestaShop SA
 *}
 {if isset($order)}
+{if !$is_guest}
+{$HOOK_ORDERDETAILDISPLAYED}
+<form action="{$link->getPageLink('order-detail', true)|escape:'html':'UTF-8'}" method="post" class="std" id="sendOrderMessage">
+		<h3 class="page-heading bottom-indent">{l s='Add a message'}</h3>
+		<p>{l s='If you would like to add a comment about your order, please write it in the field below.'}</p>
+		<p class="form-group">
+		<label for="id_product">{l s='Product'}</label>
+			<select name="id_product" class="form-control">
+				<option value="0">{l s='-- Choose --'}</option>
+				{foreach from=$products item=product name=products}
+					<option value="{$product.product_id}">{$product.product_name}</option>
+				{/foreach}
+			</select>
+		</p>
+		<p class="form-group">
+			<textarea class="form-control" cols="67" rows="3" name="msgText"></textarea>
+		</p>
+		<div class="submit">
+			<input type="hidden" name="id_order" value="{$order->id|intval}" />
+			<input type="submit" class="unvisible" name="submitMessage" value="{l s='Send'}"/>
+			<button type="submit" name="submitMessage" class="button btn btn-default button-medium"><span>{l s='Send'}<i class="icon-chevron-right right"></i></span></button>
+		</div>
+</form>
+{/if}
 <div class="box box-small clearfix">
 	{if isset($reorderingAllowed) && $reorderingAllowed}
 	<form id="submitReorder" action="{if isset($opc) && $opc}{$link->getPageLink('order-opc', true)}{else}{$link->getPageLink('order', true)}{/if}" method="post" class="submit">
@@ -113,7 +137,7 @@
 		</div>
 	</div>
 </div>
-{$HOOK_ORDERDETAILDISPLAYED}
+
 {if !$is_guest}<form action="{$link->getPageLink('order-follow', true)|escape:'html':'UTF-8'}" method="post">{/if}
 <div id="order-detail-content" class="table_block table-responsive">
 	<table class="table table-bordered">
@@ -441,28 +465,7 @@
 	<p class="alert alert-success">
 		{l s='Message successfully sent'}
 	</p>
-	{/if}
-	<form action="{$link->getPageLink('order-detail', true)|escape:'html':'UTF-8'}" method="post" class="std" id="sendOrderMessage">
-		<h3 class="page-heading bottom-indent">{l s='Add a message'}</h3>
-		<p>{l s='If you would like to add a comment about your order, please write it in the field below.'}</p>
-		<p class="form-group">
-		<label for="id_product">{l s='Product'}</label>
-			<select name="id_product" class="form-control">
-				<option value="0">{l s='-- Choose --'}</option>
-				{foreach from=$products item=product name=products}
-					<option value="{$product.product_id}">{$product.product_name}</option>
-				{/foreach}
-			</select>
-		</p>
-		<p class="form-group">
-			<textarea class="form-control" cols="67" rows="3" name="msgText"></textarea>
-		</p>
-		<div class="submit">
-			<input type="hidden" name="id_order" value="{$order->id|intval}" />
-			<input type="submit" class="unvisible" name="submitMessage" value="{l s='Send'}"/>
-			<button type="submit" name="submitMessage" class="button btn btn-default button-medium"><span>{l s='Send'}<i class="icon-chevron-right right"></i></span></button>
-		</div>
-	</form>
+	{/if}	
 {else}
 <p class="alert alert-info"><i class="icon-info-sign"></i>{l s='You cannot return merchandise with a guest account'}</p>
 {/if}

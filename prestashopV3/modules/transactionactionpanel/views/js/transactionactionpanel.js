@@ -35,22 +35,17 @@ $(document).ready(function(){
 		var parent_form = $(e.target).closest("form");
 		var inputs = $(parent_form).find("input");
 		
-		var post_data = 'controller=ProcessAction'
-			           +'&ajax=true'
-			           +'&fc=module'
-			           +'&module=transactionactionpanel'
-			           +'&ajax=true'
+		var formData = new FormData($(e.target).closest("form")[0]);
 		
+		var transaction_id = '';
+				
 		$.each(inputs, function (index){
 			var name = $(this).attr("name");
 			var value = $(this).attr("value");
 			var type = $(this).attr("type");
 			
 			if(name == "transaction_id")
-				var transaction_id = value;
-			
-			if(type != "submit")
-				post_data = post_data + '&' + name + '=' + value 
+				transaction_id = value;
 		});
 		
 		$.ajax({
@@ -59,11 +54,22 @@ $(document).ready(function(){
 			url: baseUri + 'index.php?rand=' + new Date().getTime(),
 			async: true,
 			cache: false,
-			dataType: 'xml',
-			data: post_data,
+			dataType: 'json',
+			data: formData,
+			contentType: false,
+			processData: false,
 			success: function(data)
 			{
-				$("#transation_block_" + transaction_id).replaceWith(data);
+				if(!data.errors)
+				{
+					$("#transation_block_" + transaction_id).fadeOut("slow", function(){
+						var newcontent = $(data.next_step).hide();
+						$(this).replaceWith(newcontent);
+						$("#transation_block_" + transaction_id).fadeIn("slow");
+					});
+				}else{
+					$("#error_"+transaction_id).text(data.errors);
+				}
 			}});
 
 	});

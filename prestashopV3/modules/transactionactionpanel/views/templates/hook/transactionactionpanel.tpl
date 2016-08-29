@@ -1,72 +1,102 @@
-{*
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to serviceer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author PrestaShop SA <contact@prestashop.com>
-*  @copyright  2007-2015 PrestaShop SA
-*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*}
+{* * 2007-2015 PrestaShop * * NOTICE OF LICENSE * * This source file is
+subject to the Academic Free License (AFL 3.0) * that is bundled with
+this package in the file LICENSE.txt. * It is also available through the
+world-wide-web at this URL: * http://opensource.org/licenses/afl-3.0.php
+* If you did not receive a copy of the license and are unable to *
+obtain it through the world-wide-web, please send an email * to
+license@prestashop.com so we can send you a copy immediately. * *
+DISCLAIMER * * Do not edit or add to this file if you wish to upgrade
+PrestaShop to serviceer * versions in the future. If you wish to
+customize PrestaShop for your * needs please refer to
+http://www.prestashop.com for more information. * * @author PrestaShop
+SA <contact@prestashop.com> * @copyright 2007-2015 PrestaShop SA *
+@license http://opensource.org/licenses/afl-3.0.php Academic Free
+License (AFL 3.0) * International Registered Trademark & Property of
+PrestaShop SA *}
 
 <!-- MODULE Block service products -->
 
 
-	    <div id="transation_block_{$transaction['id_transaction']}" class="transation_block">	
-		<h4 class="transaction_block">{$transaction['id_transaction']}</h4>
-		<form id="transation_form_{$transaction['id_transaction']}" action="#" method="POST">		
-		<input type="hidden" name="transaction_id" value="{$transaction['id_transaction']}">
-		<input type="hidden" name="current_step" value="{$transaction['current_step']}">
-		<input type="hidden" name="stephandler" value="{$transaction['stephandler']}">
-		<input type="hidden" name="steptype" value="{$transaction['steptype']}">
-		<input type="hidden" name="servicetype" value="{$transaction['servicetype']}">
-		<br>
-		{$transaction['description']}
-		<br>
-		{$transaction['status_string']}
-		<br>
-		{$transaction['instruction']}
-		<br>
-		<table id = transation_input_{$transaction['id_transaction']}" class="transaction_input">
-		{if isset($transaction.ui_list)}		
-			{foreach from=$transaction.ui_list item=ui_item name=ui_list}		
-				<tr class="item">
-					{if $ui_item.ui_element_type == "text"}
-				   		<td class="bold">
-					    	<label>{$ui_item.ui_element_label}</label>
-				    	</td>
-				    	<td>					    
-					    	<input type="text" name="{$ui_item.ui_element_name}">
-				    	</td>
-					{/if}
-					{if $ui_item.ui_element_type == "submit"}
-				    	<td>					    
-					    	<input onclick="submit_transaction_panel_inputs()" class="transactionactionpanel_submit" id="transation_submit_{$transaction['id_transaction']}" type="submit" name="{$ui_item.ui_element_name}" value="{$ui_item.ui_element_label}">
-				    	</td>
-					{/if}
-				</tr>
-			{/foreach}
-		{/if}
-		</table>
-		</form>
-		</div>
+<div id="transation_block_{$transaction['id_transaction']}"
+	class="transation_block">
+	<h2 class="transaction_block">{$transaction['product_name']} - {$transaction['tag']}</h2>
 
-	
-	
+	<form id="msform" enctype="multipart/form-data">
+		<!-- progressbar -->
+		<ul id="progressbar">
+		    {foreach from=$transaction.service_steps item=service_step name=service_steps}
+			    <li class="{($transaction['current_step'] == $service_step['id_step'])?'active':''}">{$service_step['name']}</li>			
+			{/foreach} 
+		</ul>
+
+		<div id="error_{$transaction['id_transaction']}"></div>
+		<fieldset id="transation_form_{$transaction['id_transaction']}"
+			action="#" method="POST">
+			<input type="hidden" name="transaction_id"
+				value="{$transaction['id_transaction']}"> <input type="hidden"
+				name="current_step" value="{$transaction['current_step']}"> <input
+				type="hidden" name="stephandler"
+				value="{$transaction['stephandler']}"> <input type="hidden"
+				name="steptype" value="{$transaction['steptype']}"> <input
+				type="hidden" name="servicetype"
+				value="{$transaction['servicetype']}">
+				<input
+				type="hidden" name="id_product"
+				value="{$transaction['id_product']}">
+				<input
+				type="hidden" name="ajax"
+				value="true">
+				<input
+				type="hidden" name="fc"
+				value="module">
+				<input
+				type="hidden" name="module"
+				value="transactionactionpanel"> 
+				<input
+				type="hidden" name="controller"
+				value="ProcessAction"><br>
+			<div class = 'instruction'>
+			{$transaction['description']} <br> 
+            {$transaction['status_string']} <br>
+			{$transaction['instruction']} <br>
+			</div>
+
+			{if isset($transaction.ui_list)} {foreach from=$transaction.ui_list
+			item=ui_item name=ui_list} {if $ui_item.ui_element_type == "text"}
+			<input type="text" name="{$ui_item.ui_element_name}"
+				placeholder="{$ui_item.ui_element_label}"> {/if} {/foreach} 
+            {foreach from=$transaction.ui_list
+			item=ui_item name=ui_list} {if $ui_item.ui_element_type == "custom"}
+			{$ui_item.ui_element_custom_content} {/if} {/foreach}
+			
+            {foreach from=$transaction.ui_list
+			item=ui_item name=ui_list} {if $ui_item.ui_element_type == "file"}
+			<label for="{$ui_item.ui_element_name}"> {$ui_item.ui_element_label} </label>
+			<input type="file" name="{$ui_item.ui_element_name}[]" 
+			multiple {if isset($ui_item.ui_element_accept)} id="{$ui_item.ui_element_name}" accpet="{$ui_item.ui_element_accept}"
+			{/if}>
+            {/if} 
+            {/foreach}
+            
+			{foreach
+			from=$transaction.ui_list item=ui_item name=ui_list} {if
+			$ui_item.ui_element_type == "submit"}
+			<input onclick="submit_transaction_panel_inputs()"
+				class="transactionactionpanel_submit action-button"
+				id="transation_submit_{$transaction['id_transaction']}"
+				type="button" name="{$ui_item.ui_element_name}"
+				value="{$ui_item.ui_element_label}"> {/if} {/foreach} {/if}
+			<div id="transaction_footnote_{$transaction['id_transaction']}", class="transaction_foot_note">
+				{foreach from=$transaction.public_params item=public_param name=public_params}
+					{$public_param.displayName}:{$public_param.value}<br>
+				{/foreach} 
+			</div>
+		</fieldset>
+	</form>
+</div>
+
+
+
 <!-- 	<div class="block_content"> -->
 <!-- 	{if $service_products !== false} -->
 <!-- 		<ul class="product_images clearfix"> -->
