@@ -2,38 +2,16 @@
 
 class TransactionCompletedHandlerCore
 {
-	public function getRequiredUIInputs()
+	public function processUIInputs($context_inputs, &$outputs, $service_parameters, &$error_info)
 	{
-		return array ();
+		return AbstractHandler::PROCESS_SUCCESS;
 	}
-	
-	public function getUIDisplay()
+	public function getReadableStatusString($context_inputs, $service_parameters, $lang)
 	{
-		return "Transaction Completed¡£";
+		return '';
 	}
-	
-	public function processUIInputs($inputs, $context)
+	public function getAdditionalUIElements($service_parameters)
 	{
-		return AbstractHandlerCore::PROCESS_SUCCESS;
-	}
-	
-	public function getReadableStatusString($lang)
-	{
-		return "Transaction Completed.";
-	}
-	
-	public function getPossibleProcessCodes()
-	{
-		return array (AbstractHandlerCore::PROCESS_SUCCESS, AbstractHandlerCore::PROCESS_FAIL);
-	}
-	
-	public function getOutputVariableNames()
-	{
-		return array ();
-	}
-	
-	public function getInputVariableNames()
-	{
-		return array ();
+		return '';
 	}
 }

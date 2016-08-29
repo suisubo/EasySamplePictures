@@ -130,3 +130,28 @@ body {
 	background: #27AE60;
 	color: white;
 }
+
+.transaction_container {
+   height: auto;
+   overflow: hidden;
+}
+
+.transaction_right {
+    width: 300px;
+    float: right;
+    margin-left: 30px;  
+    margin-top: 30px;  
+}
+
+.transaction_left {
+    float: none; /* not needed, just for clarification */    
+    /* the next props are meant to keep this block independent from the other floated one */
+    width: auto;
+    overflow: hidden;
+}
+
+.transaction_error {
+	margin-top: 15px;
+	color: red;
+	font-weight: bold;
+}​​

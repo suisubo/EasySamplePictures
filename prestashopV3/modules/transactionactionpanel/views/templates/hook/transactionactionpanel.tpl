@@ -19,77 +19,73 @@ PrestaShop SA *}
 
 <div id="transation_block_{$transaction['id_transaction']}"
 	class="transation_block">
-	<h2 class="transaction_block">{$transaction['product_name']} - {$transaction['tag']}</h2>
+	<h2 class="transaction_block">{$transaction['product_name']} -
+		{$transaction['tag']}</h2>
 
 	<form id="msform" enctype="multipart/form-data">
 		<!-- progressbar -->
 		<ul id="progressbar">
-		    {foreach from=$transaction.service_steps item=service_step name=service_steps}
-			    <li class="{($transaction['current_step'] == $service_step['id_step'])?'active':''}">{$service_step['name']}</li>			
-			{/foreach} 
+			{foreach from=$transaction.service_steps item=service_step
+			name=service_steps}
+			<li
+				class="{($transaction['current_step'] == $service_step['id_step'])?'active':''}">{$service_step['name']}</li>
+			{/foreach}
 		</ul>
 
-		<div id="error_{$transaction['id_transaction']}"></div>
 		<fieldset id="transation_form_{$transaction['id_transaction']}"
 			action="#" method="POST">
-			<input type="hidden" name="transaction_id"
-				value="{$transaction['id_transaction']}"> <input type="hidden"
-				name="current_step" value="{$transaction['current_step']}"> <input
-				type="hidden" name="stephandler"
-				value="{$transaction['stephandler']}"> <input type="hidden"
-				name="steptype" value="{$transaction['steptype']}"> <input
-				type="hidden" name="servicetype"
-				value="{$transaction['servicetype']}">
-				<input
-				type="hidden" name="id_product"
-				value="{$transaction['id_product']}">
-				<input
-				type="hidden" name="ajax"
-				value="true">
-				<input
-				type="hidden" name="fc"
-				value="module">
-				<input
-				type="hidden" name="module"
-				value="transactionactionpanel"> 
-				<input
-				type="hidden" name="controller"
-				value="ProcessAction"><br>
-			<div class = 'instruction'>
-			{$transaction['description']} <br> 
-            {$transaction['status_string']} <br>
-			{$transaction['instruction']} <br>
-			</div>
+			<div id="error_{$transaction['id_transaction']}" class="transaction_error"></div>
+			<div class="transaction_container">
+			    <div class='transaction_right'>
+			        <b>Step Description:</b> <br>
+					{$transaction['description']} <br>
+					<br> <br> <br>
+					<b>Instruction:</b> <br>  
+					{$transaction['instruction']} <br>
+				</div>
+				<div class="transaction_left">
+					<input type="hidden" name="transaction_id"
+						value="{$transaction['id_transaction']}"> <input type="hidden"
+						name="current_step" value="{$transaction['current_step']}"> <input
+						type="hidden" name="stephandler"
+						value="{$transaction['stephandler']}"> <input type="hidden"
+						name="steptype" value="{$transaction['steptype']}"> <input
+						type="hidden" name="servicetype"
+						value="{$transaction['servicetype']}"> <input type="hidden"
+						name="id_product" value="{$transaction['id_product']}"> <input
+						type="hidden" name="ajax" value="true"> <input type="hidden"
+						name="fc" value="module"> <input type="hidden" name="module"
+						value="transactionactionpanel"> <input type="hidden"
+						name="controller" value="ProcessAction"><br> {if
+					isset($transaction.ui_list)} {foreach from=$transaction.ui_list
+					item=ui_item name=ui_list} {if $ui_item.ui_element_type == "text"}
+					<input type="text" name="{$ui_item.ui_element_name}"
+						placeholder="{$ui_item.ui_element_label}"> {/if} {/foreach}
+					{foreach from=$transaction.ui_list item=ui_item name=ui_list} {if
+					$ui_item.ui_element_type == "custom"}
+					{$ui_item.ui_element_custom_content} {/if} {/foreach} {foreach
+					from=$transaction.ui_list item=ui_item name=ui_list} {if
+					$ui_item.ui_element_type == "file"} <label
+						for="{$ui_item.ui_element_name}"> {$ui_item.ui_element_label} </label>
+					<input type="file" name="{$ui_item.ui_element_name}[]" multiple {if
+						isset($ui_item.ui_element_accept)} id="{$ui_item.ui_element_name}"
+						accpet="{$ui_item.ui_element_accept}"{/if}> {/if} {/foreach}
 
-			{if isset($transaction.ui_list)} {foreach from=$transaction.ui_list
-			item=ui_item name=ui_list} {if $ui_item.ui_element_type == "text"}
-			<input type="text" name="{$ui_item.ui_element_name}"
-				placeholder="{$ui_item.ui_element_label}"> {/if} {/foreach} 
-            {foreach from=$transaction.ui_list
-			item=ui_item name=ui_list} {if $ui_item.ui_element_type == "custom"}
-			{$ui_item.ui_element_custom_content} {/if} {/foreach}
-			
-            {foreach from=$transaction.ui_list
-			item=ui_item name=ui_list} {if $ui_item.ui_element_type == "file"}
-			<label for="{$ui_item.ui_element_name}"> {$ui_item.ui_element_label} </label>
-			<input type="file" name="{$ui_item.ui_element_name}[]" 
-			multiple {if isset($ui_item.ui_element_accept)} id="{$ui_item.ui_element_name}" accpet="{$ui_item.ui_element_accept}"
-			{/if}>
-            {/if} 
-            {/foreach}
-            
-			{foreach
-			from=$transaction.ui_list item=ui_item name=ui_list} {if
-			$ui_item.ui_element_type == "submit"}
-			<input onclick="submit_transaction_panel_inputs()"
-				class="transactionactionpanel_submit action-button"
-				id="transation_submit_{$transaction['id_transaction']}"
-				type="button" name="{$ui_item.ui_element_name}"
-				value="{$ui_item.ui_element_label}"> {/if} {/foreach} {/if}
-			<div id="transaction_footnote_{$transaction['id_transaction']}", class="transaction_foot_note">
-				{foreach from=$transaction.public_params item=public_param name=public_params}
-					{$public_param.displayName}:{$public_param.value}<br>
-				{/foreach} 
+					{foreach from=$transaction.ui_list item=ui_item name=ui_list} {if
+					$ui_item.ui_element_type == "submit"} <input
+						onclick="submit_transaction_panel_inputs()"
+						class="transactionactionpanel_submit action-button"
+						id="transation_submit_{$transaction['id_transaction']}"
+						type="button" name="{$ui_item.ui_element_name}"
+						value="{$ui_item.ui_element_label}"> {/if} {/foreach}{else}
+                        {$transaction['status_string']}{/if}
+				</div>				
+			</div>
+			<div id="transaction_footnote_{$transaction['id_transaction']}"
+				, class="transaction_foot_note">
+				{foreach from=$transaction.public_params item=public_param
+				name=public_params}
+				{$public_param.displayName}:{$public_param.value}<br> {/foreach}
 			</div>
 		</fieldset>
 	</form>
