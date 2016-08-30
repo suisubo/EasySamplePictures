@@ -23,7 +23,7 @@ class UploadProductPicturesHandlerCore extends AbstractHandler
 						$target_file = $target_dir.'picture_'.$j.'.'.pathinfo($_FILES['sample_photo'.$i]["name"][$j], PATHINFO_EXTENSION);
 						$target_thumb_file = $target_thumb_dir.'picture_'.$j.'.'.pathinfo($_FILES['sample_photo'.$i]["name"][$j], PATHINFO_EXTENSION);
 						move_uploaded_file($_FILES['sample_photo'.$i]["tmp_name"][$j], $target_file);
-						makeThumbnails($target_file, $target_thumb_file);
+						$this->makeThumbnails($target_file, $target_thumb_file);
 					}
 				}				
 			}
