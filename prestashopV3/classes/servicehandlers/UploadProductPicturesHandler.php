@@ -59,8 +59,8 @@ class UploadProductPicturesHandlerCore extends AbstractHandler
 	
 	function makeThumbnails($img_origin, $img_thumb)
 	{
-		$thumbnail_width = 134;
-		$thumbnail_height = 189;
+		$thumbnail_width = 256;
+		$thumbnail_height = 256;
 		
 		$arr_image_details = getimagesize($img_origin); // pass id to thumb name
 		$original_width = $arr_image_details[0];
@@ -89,6 +89,9 @@ class UploadProductPicturesHandlerCore extends AbstractHandler
 		if ($imgt) {
 			$old_image = $imgcreatefrom($img_origin);
 			$new_image = imagecreatetruecolor($thumbnail_width, $thumbnail_height);
+			// set background to white
+			$white = imagecolorallocate($new_image, 255, 255, 255);
+			imagefill($new_image, 0, 0, $white);
 			imagecopyresized($new_image, $old_image, $dest_x, $dest_y, 0, 0, $new_width, $new_height, $original_width, $original_height);
 			$imgt($new_image, $img_thumb);
 		}
