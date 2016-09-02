@@ -25,7 +25,10 @@ class transactionactionpanel extends Module
 	{
 		$success = (parent::install()
 			&& $this->registerHook('displayOrderDetail')
-			&& $this->registerHook('header')
+			&& $this->registerHook('header') 
+			&& $this->registerHook('displayAdminOrder') 
+			&& $this->registerHook('ActionAdminControllerSetMedia')
+			&& $this->registerHook('displayProductTabContent')
 		);
 
 		$this->_clearCache('*');
@@ -37,17 +40,68 @@ class transactionactionpanel extends Module
 	{
 		if (!parent::uninstall())
 			return false;
-			return true;
+		return true;
+	}
+	
+	public function hookdisplayProductTabContent($params)
+	{
+		$db = Db::getInstance();
+		
+		$sql = 'select * from '._DB_PREFIX_.'z_demo_transaction where id_product = '
+				.((is_a($params['product'], 'Product'))?$params['product']->id:$params['product']);
+		$demo_transactions = $db->ExecuteS($sql);
+		
+		$sql = 'select * from '._DB_PREFIX_.'z_transaction where id_transaction = "'.$demo_transactions[0]['id_transaction'].'"';
+		$transactions = $db->ExecuteS($sql);
+		
+		$transacton = $transactions[0];
+		
+		$transacton['current_step'] = (isset($params['id_step']))? $params['id_step']:1;
+		
+		if($transacton['current_step'] != '1')
+		{
+			$input_nav_pre['ui_element_type'] = 'submit';
+			$input_nav_pre['ui_element_name'] = 'nav_prev';
+			$input_nav_pre['ui_element_label'] = 'View Previous Step';
+			$ui_list[] = $input_nav_pre;
+		}
+		
+		$input_nav_nxt['ui_element_type'] = 'submit';
+		$input_nav_nxt['ui_element_name'] = 'nav_next';
+		$input_nav_nxt['ui_element_label'] = 'View Next Step';
+		$ui_list[] = $input_nav_nxt;
+		
+		$demo_block = $this->displayTransactionDetail($transacton, false, false, $ui_list);
+			
+		$this->smarty->assign(array(
+					'transactionpanel' => $demo_block
+			));
+			
+		return $this->display(__FILE__, 'transactiondemopanel.tpl', $this->getCacheId('transactiondemopanel.tpl'));
+	}
+	
+	public function hookActionAdminControllerSetMedia()
+	{
+		$this->context->controller->addJS($this->_path.'views/js/transactionactionpanel.js');
+		$this->context->controller->addJS($this->_path.'views/js/fotorama.js');
+		$this->context->controller->addCSS($this->_path.'views/css/msform.css', 'all');
+		$this->context->controller->addCSS($this->_path.'views/css/fotorama.css', 'all');
+		$this->context->controller->addCSS($this->_path.'views/css/buttonstyle.css', 'all');
 	}
 	
 	public function hookHeader($params)
 	{
 		$this->context->controller->addJS($this->_path.'views/js/transactionactionpanel.js');
+		$this->context->controller->addJS($this->_path.'views/js/fotorama.js');
 		$this->context->controller->addCSS($this->_path.'views/css/msform.css', 'all');
+		$this->context->controller->addCSS($this->_path.'views/css/fotorama.css', 'all');
+		$this->context->controller->addCSS($this->_path.'views/css/buttonstyle.css', 'all');
 	}
 	
-	public function displayTransactionDetail($transaction)
+	public function displayTransactionDetail($transaction, $showProductName = true, $showSubmit = true, $extendedButtons = null)
 	{
+		$is_admin = (defined('_PS_ADMIN_DIR_') || (int)(Tools::getValue("is_admin", 0)))?1:0;
+		
 		$db = Db::getInstance();
 		
 		$id_product = $transaction["id_product"];
@@ -117,6 +171,9 @@ class transactionactionpanel extends Module
 						}
 					}
 				}
+				
+				$local_params['transaction_id'] = $transaction['id_transaction'];
+				
 				$handler_class = $step_types[0]["step_handler"];
 				$handler = new $handler_class();
 				
@@ -125,23 +182,24 @@ class transactionactionpanel extends Module
 				$service_params = $db->ExecuteS($sql);
 				$statusstring = $handler->getReadableStatusString($local_params, $service_params);
 				
+				$step_ui = array();
+				if($action_partner == $is_admin)
+				{
+					$sql = 'select * from '._DB_PREFIX_.'z_step_type_ui where id_step_type = '.$id_step_type.' order by sequence';
+					$step_ui = $db->ExecuteS($sql);
+					
+					$additional_uis = $handler->getAdditionalInputUIElements($local_params, $service_params);
+					if($additional_uis != null)
+					{
+						$step_ui = array_merge($step_ui, $additional_uis);
+					}
+				}
 				
-				$sql = 'select * from '._DB_PREFIX_.'z_step_type_ui where id_step_type = '.$id_step_type.' order by sequence';
-				$step_ui = $db->ExecuteS($sql);
-				
-								
-				$additional_uis = $handler->getAdditionalUIElements($service_params);
-				
-				if($additional_uis)
+				$additional_uis = $handler->getAdditionalStatusUIElements($local_params, $service_params);
+				if($additional_uis != null)
 				{
 					$step_ui = array_merge($step_ui, $additional_uis);
-				}
-				
-				if($action_partner == 1)
-				{
-					$step_ui = null;
-					$instruction = null;						
-				}
+				} 
 				
 				if(count($step_types) == 1)
 				{
@@ -194,12 +252,18 @@ class transactionactionpanel extends Module
 							"servicetype" => $servie_product['id_service_type'],
 							"description" => $description,
 							"id_product" => $id_product,
+							"show_instruction" => ($action_partner == $is_admin),
 							"steptype" => $id_step_type,
 							"stephandler" => $step_types[0]["step_handler"],
 							"ui_list" => $step_ui,
+							"is_admin" => $is_admin,
+							"base_url" => _PS_BASE_URL_.__PS_BASE_URI__,
 							"status_string" => $statusstring,
 							"service_steps" => $all_service_steps,
 							"product_name" => $product_name,
+							"show_product_name" => $showProductName,
+							"show_submit_button" => $showSubmit,
+							"extended_buttons" => $extendedButtons,
 							"public_params" => isset($public_params)?$public_params:null,
 							"tag" => (isset($context_params) && isset($context_params["tag"]))?$context_params["tag"]:''
 					);
@@ -222,10 +286,21 @@ class transactionactionpanel extends Module
 	
 	public function hookdisplayOrderDetail($params)
 	{
-		$db = Db::getInstance();
-		
 		$order = $params["order"];
 		$id_order = $order->id;
+		
+		return $this->displayOrderDetail($id_order);		
+	}
+	
+	public function hookdisplayAdminOrder($params)
+	{
+		$orderid = (int)$_GET['id_order'];
+		return $this->displayOrderDetail($orderid);
+	}
+	
+	public function displayOrderDetail($id_order)
+	{
+		$db = Db::getInstance();
 		
 		$sql = 'select * from '._DB_PREFIX_.'z_transaction where id_order = '.$id_order;
 		
@@ -236,14 +311,12 @@ class transactionactionpanel extends Module
 		
 		$output = '<div id="transation_action_panel" class="transation_action_panel">';
 		//get all transactions linked to the order, it will also be linked to corresponding product
-		foreach ($transactions as $transaction)		
+		foreach ($transactions as $transaction)
 		{
 			$transaction_content = $this->displayTransactionDetail($transaction);
 			$output = $output.$transaction_content;
 		}
-		
+	
 		return $output = $output."</div>";
-		
-		
 	}
 }	

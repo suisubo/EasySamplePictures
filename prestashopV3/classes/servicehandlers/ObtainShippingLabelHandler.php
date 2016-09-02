@@ -22,6 +22,7 @@ class ObtainShippingLabelHandlerCore extends AbstractHandler
     				for($i = 1; $i <= $num_example; $i++)
     				{
     					$outputs['sample_url'.$i] = Tools::getValue('sample_url'.$i);
+    					$outputs['sample_tag'.$i] = Tools::getValue('sample_tag'.$i);
     				}
     			}
     		}
@@ -36,10 +37,14 @@ class ObtainShippingLabelHandlerCore extends AbstractHandler
     }
     
 	public function getReadableStatusString($context_inputs, $service_parameters, $lang = null){
-		return '';
+		return null;
 	}
 	
-	public function getAdditionalUIElements($service_parameters){
+	public function getAdditionalStatusUIElements($context_inputs, $service_parameters){
+		return null;
+	}
+	
+	public function getAdditionalInputUIElements($context_inputs, $service_parameters){
 		foreach($service_parameters as $service_parameter)
 		{
 			if($service_parameter['param_name'] == 'sample_num')
@@ -48,12 +53,17 @@ class ObtainShippingLabelHandlerCore extends AbstractHandler
 				
 				for($i = 1; $i <= $num_example; $i++)
 				{
-					$input['ui_element_type'] = 'text';
-					$input['ui_element_name'] = 'sample_url'.$i;
-					$input['ui_element_label'] = 'URL for sample '.$i;
-					$input['id_step_type'] = 1;
-						
-					$ui_list[] = $input;
+					$input_sample_tag['ui_element_type'] = 'text';
+					$input_sample_tag['ui_element_name'] = 'sample_tag'.$i;
+					$input_sample_tag['ui_element_label'] = 'Name for sample '.$i;
+					$input_sample_tag['id_step_type'] = 1;					
+					$ui_list[] = $input_sample_tag;
+					
+					$input_url['ui_element_type'] = 'text';
+					$input_url['ui_element_name'] = 'sample_url'.$i;
+					$input_url['ui_element_label'] = 'URL for sample '.$i;
+					$input_url['id_step_type'] = 1;						
+					$ui_list[] = $input_url;
 				}
 				
 				return $ui_list;

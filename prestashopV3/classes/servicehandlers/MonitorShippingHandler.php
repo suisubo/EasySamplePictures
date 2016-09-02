@@ -20,10 +20,16 @@ class MonitorShippingHandlerCore extends AbstractHandler
 		
 				return 'Package is on the route:'.$context_inputs['tracking_label'].$output;
 			}
-		}		
+		}
+		
+		return null;
 	}
 	
-	public function getAdditionalUIElements($service_parameters){
-		return false;
+	public function getAdditionalInputUIElements($context_inputs, $service_parameters){
+		return null;
+	}
+	
+	public function getAdditionalStatusUIElements($context_inputs, $service_parameters){
+		return null;
 	}
 }

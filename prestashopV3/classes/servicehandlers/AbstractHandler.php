@@ -10,5 +10,6 @@ abstract class AbstractHandlerCore
 	
 	abstract public function processUIInputs($context_inputs, &$outputs, $service_parameters, &$error_info);
 	abstract public function getReadableStatusString($context_inputs, $service_parameters, $lang);
-	abstract public function getAdditionalUIElements($service_parameters);
+	abstract public function getAdditionalInputUIElements($context_inputs, $service_parameters);
+	abstract public function getAdditionalStatusUIElements($context_inputs, $service_parameters);
 }

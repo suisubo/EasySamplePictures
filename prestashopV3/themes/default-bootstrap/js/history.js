@@ -33,6 +33,7 @@ function showOrder(mode, var_content, file)
 			$('#block-order-detail').fadeOut('slow', function()
 			{
 				$(this).html(data);
+				$('.fotorama').fotorama();
 				$('.footab').footable();
 				/* if return is allowed*/
 				if ($('#order-detail-content .order_cb').length > 0)
@@ -92,8 +93,9 @@ function showOrder(mode, var_content, file)
 				$('form#sendOrderMessage').submit(function(){
 					return sendOrderMessage();
 			});
+				
 			$(this).fadeIn('slow', function() {
-				$.scrollTo(this, 1200);
+				$.scrollTo(this, 1200);				
 			});
 		});
 	});

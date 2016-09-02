@@ -38,6 +38,7 @@ $(document).ready(function(){
 		var formData = new FormData($(e.target).closest("form")[0]);
 		
 		var transaction_id = '';
+		var base_url = '';
 				
 		$.each(inputs, function (index){
 			var name = $(this).attr("name");
@@ -46,12 +47,15 @@ $(document).ready(function(){
 			
 			if(name == "transaction_id")
 				transaction_id = value;
+			
+			if(name == "base_url")
+				base_url = value;
 		});
 		
 		$.ajax({
 			type: 'POST',
 			headers: { "cache-control": "no-cache" },
-			url: baseUri + 'index.php?rand=' + new Date().getTime(),
+			url: base_url + 'index.php?rand=' + new Date().getTime(),
 			async: true,
 			cache: false,
 			dataType: 'json',
@@ -65,6 +69,7 @@ $(document).ready(function(){
 					$("#transation_block_" + transaction_id).fadeOut("slow", function(){
 						var newcontent = $(data.next_step).hide();
 						$(this).replaceWith(newcontent);
+						$('.fotorama').fotorama();
 						$("#transation_block_" + transaction_id).fadeIn("slow");
 					});
 				}else{

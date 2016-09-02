@@ -8,10 +8,14 @@ class TransactionCompletedHandlerCore
 	}
 	public function getReadableStatusString($context_inputs, $service_parameters, $lang)
 	{
-		return '';
+		return null;
 	}
-	public function getAdditionalUIElements($service_parameters)
+	public function getAdditionalInputUIElements($context_inputs, $service_parameters)
 	{
-		return '';
+		return null;
+	}
+	
+	public function getAdditionalStatusUIElements($context_inputs, $service_parameters){
+		return null;
 	}
 }

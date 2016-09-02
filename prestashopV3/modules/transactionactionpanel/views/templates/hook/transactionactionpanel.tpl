@@ -19,8 +19,7 @@ PrestaShop SA *}
 
 <div id="transation_block_{$transaction['id_transaction']}"
 	class="transation_block">
-	<h2 class="transaction_block">{$transaction['product_name']} -
-		{$transaction['tag']}</h2>
+	<h2 class="transaction_block">{if $transaction.show_product_name }{$transaction['product_name']}{/if}</h2>
 
 	<form id="msform" enctype="multipart/form-data">
 		<!-- progressbar -->
@@ -28,7 +27,7 @@ PrestaShop SA *}
 			{foreach from=$transaction.service_steps item=service_step
 			name=service_steps}
 			<li
-				class="{($transaction['current_step'] == $service_step['id_step'])?'active':''}">{$service_step['name']}</li>
+				class="{($transaction['current_step'] == $service_step['id_step'])?'active':''}">{if $service_step.action_partner == $transaction['is_admin']} {$service_step['name_action']} {else} {$service_step['name']} {/if}</li>
 			{/foreach}
 		</ul>
 
@@ -40,13 +39,22 @@ PrestaShop SA *}
 			        <b>Step Description:</b> <br>
 					{$transaction['description']} <br>
 					<br> <br> <br>
+					{if $transaction.show_instruction && $transaction.instruction != null}
 					<b>Instruction:</b> <br>  
 					{$transaction['instruction']} <br>
+					{/if}
 				</div>
 				<div class="transaction_left">
+				    {if isset($transaction['status_string'])}
+				    <b>Current Status:</b> <br> 
+				    {$transaction['status_string']} <br>
+					{/if}
 					<input type="hidden" name="transaction_id"
-						value="{$transaction['id_transaction']}"> <input type="hidden"
-						name="current_step" value="{$transaction['current_step']}"> <input
+						value="{$transaction['id_transaction']}"><input type="hidden" name="base_url"
+						value="{$transaction['base_url']}"> <input type="hidden"
+						name="current_step" value="{$transaction['current_step']}"> 
+						<input type="hidden"
+						name="is_admin" value="{$transaction['is_admin']}"><input
 						type="hidden" name="stephandler"
 						value="{$transaction['stephandler']}"> <input type="hidden"
 						name="steptype" value="{$transaction['steptype']}"> <input
@@ -56,7 +64,8 @@ PrestaShop SA *}
 						type="hidden" name="ajax" value="true"> <input type="hidden"
 						name="fc" value="module"> <input type="hidden" name="module"
 						value="transactionactionpanel"> <input type="hidden"
-						name="controller" value="ProcessAction"><br> {if
+						name="controller" value="ProcessAction">
+						<br> {if
 					isset($transaction.ui_list)} {foreach from=$transaction.ui_list
 					item=ui_item name=ui_list} {if $ui_item.ui_element_type == "text"}
 					<input type="text" name="{$ui_item.ui_element_name}"
@@ -70,15 +79,22 @@ PrestaShop SA *}
 					<input type="file" name="{$ui_item.ui_element_name}[]" multiple {if
 						isset($ui_item.ui_element_accept)} id="{$ui_item.ui_element_name}"
 						accpet="{$ui_item.ui_element_accept}"{/if}> {/if} {/foreach}
-
+					{if $transaction.show_submit_button}
 					{foreach from=$transaction.ui_list item=ui_item name=ui_list} {if
 					$ui_item.ui_element_type == "submit"} <input
 						onclick="submit_transaction_panel_inputs()"
 						class="transactionactionpanel_submit action-button"
 						id="transation_submit_{$transaction['id_transaction']}"
 						type="button" name="{$ui_item.ui_element_name}"
-						value="{$ui_item.ui_element_label}"> {/if} {/foreach}{else}
-                        {$transaction['status_string']}{/if}
+						value="{$ui_item.ui_element_label}"> {/if} {/foreach}{/if}{/if}
+				</div>
+				<div>				
+				{foreach from=$transaction.extended_buttons item=extended_button name=extended_buttons} {if
+					$extended_button.ui_element_type == "submit"} <input
+						onclick="submit_transaction_panel_inputs()"
+						class="transactionactionpanel_nav action-button"
+						type="button" name="{$extended_button.ui_element_name}"
+						value="{$extended_button.ui_element_label}"> {/if} {/foreach}
 				</div>				
 			</div>
 			<div id="transaction_footnote_{$transaction['id_transaction']}"
