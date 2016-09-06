@@ -8,8 +8,31 @@ abstract class AbstractHandlerCore
 	const STEP_INPUT_PARTNER_CUSTOMER = 0;
 	const STEP_INPUT_PARTNER_VENDOR = 1;	
 	
-	abstract public function processUIInputs($context_inputs, &$outputs, $service_parameters, &$error_info);
-	abstract public function getReadableStatusString($context_inputs, $service_parameters, $lang);
-	abstract public function getAdditionalInputUIElements($context_inputs, $service_parameters);
-	abstract public function getAdditionalStatusUIElements($context_inputs, $service_parameters);
+	public function processUIInputs($context_inputs, &$outputs, $service_parameters, &$error_info)
+	{
+		return AbstractHandler::PROCESS_SUCCESS;
+	}
+	
+	public function processUIInputsNonAction($context_inputs, &$outputs, $service_parameters, &$error_info)
+	{
+		return AbstractHandler::PROCESS_SUCCESS;
+	}
+	
+    public function getReadableStatusString($context_inputs, $service_parameters, $lang)
+    {
+    	return null;
+    }
+	public function getAdditionalInputUIElements($context_inputs, $service_parameters)
+	{
+		return null;
+	}
+	public function getAdditionalStatusUIElements($context_inputs, $service_parameters)
+	{
+		return null;
+	}
+	
+	public function getAdditionalInputUIElementsNonAction($context_inputs, $service_parameters)
+	{
+		return null;
+	}
 }

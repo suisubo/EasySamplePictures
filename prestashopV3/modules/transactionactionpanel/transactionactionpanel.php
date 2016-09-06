@@ -32,46 +32,97 @@ class transactionactionpanel extends Module
 		);
 
 		$this->_clearCache('*');
+		
+		$this->installTab('AdminTransaction', 'Transactions', 0);
 
 		return $success;
 	}
 	
+	private function installTab($tabClass, $tabName, $idTabParent)
+	{
+		$tab = new Tab();
+		foreach (Language::getLanguages(false) as $language)
+			$tab->name[$language['id_lang']] = $tabName;
+			$tab->class_name = $tabClass;
+			$tab->active = 1;
+			$tab->module = $this->name;
+			$tab->id_parent = $idTabParent;
+			return $tab->save();
+	}
+	
+	private function uninstallTab($tabClass)
+	{
+		$idTab = Tab::getIdFromClassName($tabClass);
+		if ($idTab != 0) {
+			$tab = new Tab($idTab);
+			$tab->delete();
+			return true;
+		}
+		return false;
+	}
+	
 	public function uninstall()
 	{
+		$this->uninstallTab('AdminTransaction');
+		
 		if (!parent::uninstall())
 			return false;
 		return true;
 	}
 	
-	public function hookdisplayProductTabContent($params)
-	{
+	public function displayProductDemoPanel($params){
 		$db = Db::getInstance();
 		
-		$sql = 'select * from '._DB_PREFIX_.'z_demo_transaction where id_product = '
-				.((is_a($params['product'], 'Product'))?$params['product']->id:$params['product']);
-		$demo_transactions = $db->ExecuteS($sql);
+		$id_product = ((is_a($params['product'], 'Product'))?$params['product']->id:$params['product']);
 		
+		$sql = 'select * from '._DB_PREFIX_.'z_demo_transaction where id_product = '.$id_product;
+		$demo_transactions = $db->ExecuteS($sql);
+
 		$sql = 'select * from '._DB_PREFIX_.'z_transaction where id_transaction = "'.$demo_transactions[0]['id_transaction'].'"';
 		$transactions = $db->ExecuteS($sql);
-		
+
 		$transacton = $transactions[0];
-		
+
 		$transacton['current_step'] = (isset($params['id_step']))? $params['id_step']:1;
-		
+
 		if($transacton['current_step'] != '1')
 		{
 			$input_nav_pre['ui_element_type'] = 'submit';
-			$input_nav_pre['ui_element_name'] = 'nav_prev';
-			$input_nav_pre['ui_element_label'] = 'View Previous Step';
+			$input_nav_pre['ui_element_name'] = 'transaction_nav_prev';
+			$input_nav_pre['ui_element_label'] = '<  Browse Previous Step';
 			$ui_list[] = $input_nav_pre;
 		}
 		
-		$input_nav_nxt['ui_element_type'] = 'submit';
-		$input_nav_nxt['ui_element_name'] = 'nav_next';
-		$input_nav_nxt['ui_element_label'] = 'View Next Step';
-		$ui_list[] = $input_nav_nxt;
+		$sql = 'select * from '._DB_PREFIX_.'z_service_product where id_product = '.$id_product;
+		$servicetypes = $db->ExecuteS($sql);
 		
-		$demo_block = $this->displayTransactionDetail($transacton, false, false, $ui_list);
+		if(count($servicetypes) == 1)
+		{
+			$sql = 'select * from '._DB_PREFIX_.'z_service_step where id_service_type = '.$servicetypes[0]['id_service_type'].' and id_step = '.$transacton['current_step'];
+			$nextsteps = $db->ExecuteS($sql);
+				
+			if(count($nextsteps) == 1)
+			{
+				$nextstep = $nextsteps[0]['next_step_id'];
+					
+				if($nextstep != -1)
+				{
+					$input_nav_nxt['ui_element_type'] = 'submit';
+					$input_nav_nxt['ui_element_name'] = 'transaction_nav_next';
+					$input_nav_nxt['ui_element_label'] = 'Browse Next Step  >';
+					$ui_list[] = $input_nav_nxt;
+				}
+			}
+		}
+		
+
+		return $this->displayTransactionDetail($transacton, false, false, $ui_list);
+	}
+	
+	
+	public function hookdisplayProductTabContent($params)
+	{
+		$demo_block = $this->displayProductDemoPanel($params);
 			
 		$this->smarty->assign(array(
 					'transactionpanel' => $demo_block
@@ -145,7 +196,7 @@ class transactionactionpanel extends Module
 				}
 				
 				$sql = 'select * from '._DB_PREFIX_.'z_service_step_mapping where id_step_type = '.$id_step_type
-				.' and id_service_type = '.$servie_product['id_service_type'].' and id_step = '.$transaction['current_step'].' and direction = 0';
+				.' and id_service_type = '.$servie_product['id_service_type'].' and id_step = '.$transaction['current_step'].' and  direction = 0';
 				
 				$mappings = $db->ExecuteS($sql);
 				foreach($mappings as $mapping)
@@ -189,6 +240,12 @@ class transactionactionpanel extends Module
 					$step_ui = $db->ExecuteS($sql);
 					
 					$additional_uis = $handler->getAdditionalInputUIElements($local_params, $service_params);
+					if($additional_uis != null)
+					{
+						$step_ui = array_merge($step_ui, $additional_uis);
+					}
+				}else{
+					$additional_uis = $handler->getAdditionalInputUIElementsNonAction($local_params, $service_params);
 					if($additional_uis != null)
 					{
 						$step_ui = array_merge($step_ui, $additional_uis);
@@ -246,6 +303,12 @@ class transactionactionpanel extends Module
 						}
 					}
 					
+					$token = '';
+					if($is_admin)
+						$token=Tools::getAdminToken('AdminTransaction'.
+								intval(Tab::getIdFromClassName('AdminTransaction')).
+								intval(Context::getContext()->employee->id));
+					
 					$transactions_ui = array("id_transaction" => $transaction['id_transaction'],
 							"current_step" => $transaction['current_step'],
 							"instruction" => $instruction,
@@ -256,8 +319,10 @@ class transactionactionpanel extends Module
 							"steptype" => $id_step_type,
 							"stephandler" => $step_types[0]["step_handler"],
 							"ui_list" => $step_ui,
+							"controller" => $is_admin?'AdminTransaction':'ProcessAction',
 							"is_admin" => $is_admin,
-							"base_url" => _PS_BASE_URL_.__PS_BASE_URI__,
+							"token" => $token,
+							"base_url" => _PS_BASE_URL_.__PS_BASE_URI__.($is_admin?'admin350/':''),
 							"status_string" => $statusstring,
 							"service_steps" => $all_service_steps,
 							"product_name" => $product_name,
@@ -298,6 +363,28 @@ class transactionactionpanel extends Module
 		return $this->displayOrderDetail($orderid);
 	}
 	
+	public function displayAllTransactions()
+	{
+		$db = Db::getInstance();
+		
+		$sql = 'select * from '._DB_PREFIX_.'z_transaction';
+		
+		$transactions = $db->ExecuteS($sql);
+		
+		if(!$transactions || count(transactions) == 0)
+			return '';
+		
+		$output = '<div id="transation_action_panel" class="transation_action_panel">';
+		//get all transactions linked to the order, it will also be linked to corresponding product
+		foreach ($transactions as $transaction)
+		{
+			$transaction_content = $this->displayTransactionDetail($transaction);
+			$output = $output.$transaction_content;
+		}
+	
+		return $output = $output."</div>";
+	}
+	
 	public function displayOrderDetail($id_order)
 	{
 		$db = Db::getInstance();
@@ -318,5 +405,100 @@ class transactionactionpanel extends Module
 		}
 	
 		return $output = $output."</div>";
+	}
+	
+	public function processActions(){
+		$db = Db::getInstance ();
+		
+		$ajaxReturn = array();
+		
+		$handler_class = Tools::getValue ( "stephandler" );
+		$handler = new $handler_class ();
+		
+		$service_type = Tools::getValue ( "servicetype" );
+		$transaction_id = Tools::getValue ( "transaction_id" );
+		$current_step = Tools::getValue ( "current_step" );
+		$steptype = Tools::getValue ( "steptype" );
+		$id_product = Tools::getValue ( "id_product" );
+		$actionbutton = Tools::getValue ( "actionbutton" );
+		
+		$sql = 'select * from ' . _DB_PREFIX_ . 'z_transaction_context where id_transaction = "' . $transaction_id . '"';
+		$context = $db->ExecuteS ( $sql );
+		
+		$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_mapping where id_step_type = ' . $steptype . ' and id_service_type = ' . $service_type . ' and id_step = ' . $current_step . ' and direction = 0';
+		
+		$mappings = $db->ExecuteS ( $sql );
+		foreach ( $mappings as $mapping ) {
+			$context_param_value = $context [$mapping ['context_para_name']];
+			if ($context_param_value != null) {
+				$local_params [$mapping ['local_para_name']] = $context_param_value;
+			}
+		}
+		
+		$sql = 'select * from ' . _DB_PREFIX_ . 'z_product_params where id_product = ' . $id_product;
+		$service_params = $db->ExecuteS ( $sql );
+		
+		$return = AbstractHandler::PROCESS_SUCCESS;
+		
+		if ($actionbutton == null)
+			$return = $handler->processUIInputs ( $local_params, $outputs, $service_params, $errorinfo );
+		else
+			$return = $handler->processUIInputsNonAction ( $local_params, $outputs, $service_params, $errorinfo );
+		
+		if ($return == AbstractHandler::PROCESS_SUCCESS) {
+			$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_mapping where id_step_type = ' . $steptype . ' and id_service_type = ' . $service_type . ' and id_step = ' . $current_step . ' and direction = 1';
+			
+			$mappings = $db->ExecuteS ( $sql );
+			
+			foreach ( $mappings as $mapping ) {
+				if (! $mapping ['regex']) {
+					$local_param_value = $outputs [$mapping ['local_para_name']];
+					if ($local_param_value != null) {
+						$context [$mapping ['context_para_name']] = $local_param_value;
+						
+						$sql = "insert into " . _DB_PREFIX_ . "z_transaction_context (id_transaction, param_name, param_value) VALUES ('" . $transaction_id . "', '" . $mapping ['context_para_name'] . "', '" . $local_param_value . "') ON DUPLICATE KEY UPDATE " . "param_value = '" . $local_param_value . "'";
+						$db->ExecuteS ( $sql );
+					}
+				} else {
+					foreach ( $outputs as $key => $value ) {
+						if (preg_match ( "/" . $mapping ['local_para_name'] . "/", $key, $maches )) {
+							for($i = 1; $i < count ( $maches ); $i ++) {
+								$param_name = str_replace ( '{' . $i . '}', $maches [$i], $mapping ['context_para_name'] );
+								$context [$param_name] = $value;
+								
+								$sql = "insert into " . _DB_PREFIX_ . "z_transaction_context (id_transaction, param_name, param_value) VALUES ('" . $transaction_id . "', '" . $param_name . "', '" . $value . "') ON DUPLICATE KEY UPDATE " . "param_value = '" . $value . "'";
+								$db->ExecuteS ( $sql );
+							}
+						}
+					}
+				}
+			}
+			
+			if ($actionbutton == null) {
+				$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step where id_service_type = ' . $service_type . ' and id_step = ' . $current_step;
+				$nextsteps = $db->ExecuteS ( $sql );
+				
+				if (count ( $nextsteps ) == 1) {
+					$nextstep = $nextsteps [0] ['next_step_id'];
+					
+					$sql = "update " . _DB_PREFIX_ . "z_transaction set current_step = '" . $nextstep . "' where id_transaction = '" . $transaction_id . "'";
+					$db->ExecuteS ( $sql );
+				}
+			}
+			
+			$sql = 'select * from ' . _DB_PREFIX_ . 'z_transaction where id_transaction = "' . $transaction_id . '"';
+			$transactions = $db->ExecuteS ( $sql );
+			
+			if ($transactions != null && count ( $transactions ) == 1) {
+				
+				$transacton = $transactions [0];
+				
+				$ajaxReturn ['next_step'] = $this->displayTransactionDetail ( $transacton );				
+			}
+		} else {
+			$ajaxReturn ['errors'] = $errorinfo;
+		}
+		
+		return $ajaxReturn;
 	}
 }	

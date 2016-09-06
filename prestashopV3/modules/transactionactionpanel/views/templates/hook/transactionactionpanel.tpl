@@ -64,9 +64,18 @@ PrestaShop SA *}
 						type="hidden" name="ajax" value="true"> <input type="hidden"
 						name="fc" value="module"> <input type="hidden" name="module"
 						value="transactionactionpanel"> <input type="hidden"
-						name="controller" value="ProcessAction">
+						name="controller" value="{$transaction['controller']}">
+						<input type="hidden"
+						name="token" value="{$transaction['token']}">
 						<br> {if
-					isset($transaction.ui_list)} {foreach from=$transaction.ui_list
+					isset($transaction.ui_list)}{foreach from=$transaction.ui_list
+					item=ui_item name=ui_list} {if $ui_item.ui_element_type == "radio"}
+					<input type="radio" name="{$ui_item.ui_element_name}"
+						value="{$ui_item.ui_element_value}"> {$ui_item.ui_element_label}<br> 
+                    {/if} {/foreach}
+					{foreach from=$transaction.ui_list item=ui_item name=ui_list} {if
+					$ui_item.ui_element_type == "custom"}
+					{$ui_item.ui_element_custom_content} {/if} {/foreach} {foreach from=$transaction.ui_list
 					item=ui_item name=ui_list} {if $ui_item.ui_element_type == "text"}
 					<input type="text" name="{$ui_item.ui_element_name}"
 						placeholder="{$ui_item.ui_element_label}"> {/if} {/foreach}
@@ -87,15 +96,17 @@ PrestaShop SA *}
 						id="transation_submit_{$transaction['id_transaction']}"
 						type="button" name="{$ui_item.ui_element_name}"
 						value="{$ui_item.ui_element_label}"> {/if} {/foreach}{/if}{/if}
-				</div>
-				<div>				
-				{foreach from=$transaction.extended_buttons item=extended_button name=extended_buttons} {if
+					<div class='transaction_demo_nav'>				
+				    {foreach from=$transaction.extended_buttons item=extended_button name=extended_buttons} {if
 					$extended_button.ui_element_type == "submit"} <input
 						onclick="submit_transaction_panel_inputs()"
 						class="transactionactionpanel_nav action-button"
+						id = "{$extended_button.ui_element_name}"
 						type="button" name="{$extended_button.ui_element_name}"
 						value="{$extended_button.ui_element_label}"> {/if} {/foreach}
-				</div>				
+				     </div>		
+				</div>
+							
 			</div>
 			<div id="transaction_footnote_{$transaction['id_transaction']}"
 				, class="transaction_foot_note">

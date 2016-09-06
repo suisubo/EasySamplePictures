@@ -28,6 +28,111 @@
 //	var inputs = $(parent_form).getElementsByTagName("input");	
 //	var x = document.getElementsByName('form_name');
 //}	
+$(document).ready(
+		function() {
+			$(document).off('click', '.transaction_nonaction').on('click',
+					'.transaction_nonaction', function(e) {
+				e.preventDefault();	
+				var parent_form = $(e.target).closest("form");
+				var inputs = $(parent_form).find("input");
+				
+				var formData = new FormData($(e.target).closest("form")[0]);
+				formData.append('actionbutton', $(e.target).attr("name"));
+								
+				var base_url = '';
+				var transaction_id = '';
+				
+				$.each(inputs, function (index){
+					var name = $(this).attr("name");
+					var value = $(this).attr("value");
+					var type = $(this).attr("type");
+					
+					if(name == "base_url")
+						base_url = value;
+					
+					if(name == "transaction_id")
+						transaction_id = value;
+				});
+				
+				$.ajax({
+					type: 'POST',
+					headers: { "cache-control": "no-cache" },
+					url: base_url + 'index.php?rand=' + new Date().getTime(),
+					async: true,
+					cache: false,
+					dataType: 'json',
+					data: formData,
+					contentType: false,
+					processData: false,
+					success: function(data)
+					{
+						if(!data.errors)
+						{
+							$("#transation_block_" + transaction_id).fadeOut("slow", function(){
+								var newcontent = $(data.next_step).hide();
+								$(this).replaceWith(newcontent);
+								$('.fotorama').fotorama();
+								$("#transation_block_" + transaction_id).fadeIn("slow");
+							});
+						}
+					}});
+
+			})
+		});
+
+
+$(document).ready(
+		function() {
+			$(document).off('click', '.transactionactionpanel_nav').on('click',
+					'.transactionactionpanel_nav', function(e) {
+				e.preventDefault();	
+				var parent_form = $(e.target).closest("form");
+				var inputs = $(parent_form).find("input");
+				
+				var formData = new FormData($(e.target).closest("form")[0]);
+				formData.append('action', 'Demo');
+				formData.append('actionbutton', $(e.target).attr("name"));
+								
+				var base_url = '';
+				var transaction_id = '';
+				
+				$.each(inputs, function (index){
+					var name = $(this).attr("name");
+					var value = $(this).attr("value");
+					var type = $(this).attr("type");
+					
+					if(name == "base_url")
+						base_url = value;
+					
+					if(name == "transaction_id")
+						transaction_id = value;
+				});
+				
+				$.ajax({
+					type: 'POST',
+					headers: { "cache-control": "no-cache" },
+					url: base_url + 'index.php?rand=' + new Date().getTime(),
+					async: true,
+					cache: false,
+					dataType: 'json',
+					data: formData,
+					contentType: false,
+					processData: false,
+					success: function(data)
+					{
+						if(!data.errors)
+						{
+							$("#transation_block_" + transaction_id).fadeOut("slow", function(){
+								var newcontent = $(data.next_step).hide();
+								$(this).replaceWith(newcontent);
+								$('.fotorama').fotorama();
+								$("#transation_block_" + transaction_id).fadeIn("slow");
+							});
+						}
+					}});
+
+			})
+		});
 
 $(document).ready(function(){
 	$(document).off('click', '.transactionactionpanel_submit').on('click', '.transactionactionpanel_submit', function(e){
