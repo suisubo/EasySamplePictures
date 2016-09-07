@@ -10,6 +10,14 @@ class OffersHandlerCore extends AbstractHandler
 		return null;
 	}
 	
+	
+	public function processUIInputs($context_inputs, &$outputs, $service_parameters, &$error_info)
+	{
+		$offer_amount = Tools::getValue('accpted_offer');
+		$outputs['accepted_offer_amount'] = $offer_amount;
+		return AbstractHandler::PROCESS_SUCCESS;
+	}
+	
 	public function getAdditionalInputUIElements($context_inputs, $service_parameters){
 		foreach($context_inputs as $name => $value)
 		{
@@ -17,8 +25,8 @@ class OffersHandlerCore extends AbstractHandler
 			{				
 				$input['ui_element_type'] = 'radio';
 				$input['ui_element_name'] = 'accpted_offer';
-				$input['ui_element_value'] = (int)$maches[1];
-				$input['ui_element_label'] = (int)$maches[1];				
+				$input['ui_element_value'] = $value;
+				$input['ui_element_label'] = $value;				
 				$ui_list[] = $input;
 			}
 		}

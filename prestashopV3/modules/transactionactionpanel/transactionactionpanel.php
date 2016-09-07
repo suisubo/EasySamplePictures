@@ -231,6 +231,15 @@ class transactionactionpanel extends Module
 				
 				$sql = 'select * from '._DB_PREFIX_.'z_product_params where id_product = '.$id_product;
 				$service_params = $db->ExecuteS($sql);
+				
+				$sql = 'select * from '. _DB_PREFIX_.'z_service_step_param where id_service_type = '.$servie_product['id_service_type'].' and id_step = '.$transaction['current_step'] ;
+				$service_step_params = $db->ExecuteS ( $sql );
+				
+				foreach($service_step_params as $service_step_param)
+				{
+					$local_params[$service_step_param['param_name']] = $service_step_param['param_value'];
+				}
+				
 				$statusstring = $handler->getReadableStatusString($local_params, $service_params);
 				
 				$step_ui = array();
@@ -428,15 +437,40 @@ class transactionactionpanel extends Module
 		$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_mapping where id_step_type = ' . $steptype . ' and id_service_type = ' . $service_type . ' and id_step = ' . $current_step . ' and direction = 0';
 		
 		$mappings = $db->ExecuteS ( $sql );
-		foreach ( $mappings as $mapping ) {
-			$context_param_value = $context [$mapping ['context_para_name']];
-			if ($context_param_value != null) {
-				$local_params [$mapping ['local_para_name']] = $context_param_value;
+		foreach($mappings as $mapping)
+		{
+			if(!$mapping['regex'])
+			{
+				$context_param_value = $context_params[$mapping['context_para_name']];
+				if($context_param_value != null)
+				{
+					$local_params[$mapping['local_para_name']] = $context_param_value;
+				}
+			}else{
+				foreach($context_params as $key => $value)
+				{
+					if(preg_match('/'.$mapping['context_para_name'].'/', $key, $maches))
+					{
+						for($i = 1; $i < count($maches); $i++)
+						{
+							$param_name = str_replace('{'.$i.'}', $maches[$i], $mapping['local_para_name']);
+							$local_params[$param_name] = $value;
+						}
+					}
+				}
 			}
 		}
 		
 		$sql = 'select * from ' . _DB_PREFIX_ . 'z_product_params where id_product = ' . $id_product;
 		$service_params = $db->ExecuteS ( $sql );
+		
+		$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_param where id_service_type = '.$service_type.' and id_step = '.$current_step ;
+		$service_step_params = $db->ExecuteS ( $sql );
+		
+		foreach($service_step_params as $service_step_param)
+		{
+			$local_params[$service_step_param['param_name']] = $service_step_param['param_value'];
+		}
 		
 		$return = AbstractHandler::PROCESS_SUCCESS;
 		

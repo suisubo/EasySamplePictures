@@ -10,7 +10,7 @@ body {
 	font-family: montserrat, arial, verdana;
 }
 /*form styles*/
-#msform {
+.transaction_action_panel {
 	width: 1000px;
 	margin-top: 50px;
 	margin-left: 0px;
@@ -18,7 +18,7 @@ body {
 	text-align: center;
 	position: relative;
 }
-#msform fieldset {
+.transaction_action_panel fieldset {
 	text-align: left;
 	background: white;
 	border: 0 none;
@@ -33,15 +33,15 @@ body {
 	position: relative;
 }
 /*Hide all except first fieldset*/
-#msform fieldset:not(:first-of-type) {
+.transaction_action_panel fieldset:not(:first-of-type) {
 	display: none;
 }
 /*inputs*/
-#msform .instruction {
+.transaction_action_panel .instruction {
 	padding: 15px;
 }
 
-#msform input, #msform textarea {
+.transaction_action_panel input, .transaction_action_panel textarea {
 	padding: 15px;
 	border: 1px solid #ccc;
 	border-radius: 3px;
@@ -54,7 +54,7 @@ body {
 }
 
 /*buttons*/
-#msform .action-button {
+.transaction_action_panel .action-button {
 	width: 40%;
 	background: #27AE60;
 	font-weight: bold;
@@ -65,7 +65,7 @@ body {
 	padding: 10px 5px;
 	margin: 10px 5px;
 }
-#msform .action-button:hover, #msform .action-button:focus {
+.transaction_action_panel .action-button:hover, #msform .action-button:focus {
 	box-shadow: 0 0 0 2px white, 0 0 0 3px #27AE60;
 }
 /*headings*/

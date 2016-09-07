@@ -482,15 +482,7 @@
 			</section>
 			<!--end Data sheet -->
 		{/if}
-		{if isset($product) && $product->description}
-			<!-- More info -->
-			<section class="page-product-box">
-				<h3 class="page-product-heading">{l s='More info'}</h3>
-				<!-- full description -->
-				<div  class="rte">{$product->description}</div>
-			</section>
-			<!--end  More info -->
-		{/if}
+
 		{if isset($packItems) && $packItems|@count > 0}
 		<section id="blockpack">
 			<h3 class="page-product-heading">{l s='Pack content'}</h3>

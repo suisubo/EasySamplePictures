@@ -21,7 +21,7 @@ PrestaShop SA *}
 	class="transation_block">
 	<h2 class="transaction_block">{if $transaction.show_product_name }{$transaction['product_name']}{/if}</h2>
 
-	<form id="msform" enctype="multipart/form-data">
+	<div class="transaction_action_panel" enctype="multipart/form-data">
 		<!-- progressbar -->
 		<ul id="progressbar">
 			{foreach from=$transaction.service_steps item=service_step
@@ -45,6 +45,10 @@ PrestaShop SA *}
 					{/if}
 				</div>
 				<div class="transaction_left">
+				{foreach from=$transaction.ui_list item=ui_item name=ui_list} {if
+					$ui_item.ui_element_type == "form"}
+					{$ui_item.ui_element_form} {/if} {/foreach} 
+				<form id="msform" enctype="multipart/form-data">
 				    {if isset($transaction['status_string'])}
 				    <b>Current Status:</b> <br> 
 				    {$transaction['status_string']} <br>
@@ -73,9 +77,7 @@ PrestaShop SA *}
 					<input type="radio" name="{$ui_item.ui_element_name}"
 						value="{$ui_item.ui_element_value}"> {$ui_item.ui_element_label}<br> 
                     {/if} {/foreach}
-					{foreach from=$transaction.ui_list item=ui_item name=ui_list} {if
-					$ui_item.ui_element_type == "custom"}
-					{$ui_item.ui_element_custom_content} {/if} {/foreach} {foreach from=$transaction.ui_list
+					{foreach from=$transaction.ui_list
 					item=ui_item name=ui_list} {if $ui_item.ui_element_type == "text"}
 					<input type="text" name="{$ui_item.ui_element_name}"
 						placeholder="{$ui_item.ui_element_label}"> {/if} {/foreach}
@@ -104,7 +106,8 @@ PrestaShop SA *}
 						id = "{$extended_button.ui_element_name}"
 						type="button" name="{$extended_button.ui_element_name}"
 						value="{$extended_button.ui_element_label}"> {/if} {/foreach}
-				     </div>		
+				     </div>	
+				</form>     	
 				</div>
 							
 			</div>
@@ -115,7 +118,7 @@ PrestaShop SA *}
 				{$public_param.displayName}:{$public_param.value}<br> {/foreach}
 			</div>
 		</fieldset>
-	</form>
+	</div>
 </div>
 
 
