@@ -52,6 +52,9 @@ $(document).ready(
 					
 					if(name == "transaction_id")
 						transaction_id = value;
+					
+					if(name == "current_step")
+						return;//demo mode
 				});
 				
 				$.ajax({
@@ -155,6 +158,9 @@ $(document).ready(function(){
 			
 			if(name == "base_url")
 				base_url = value;
+			
+			if(name == "current_step")
+				return;//demo mode
 		});
 		
 		$.ajax({

@@ -89,32 +89,40 @@ class transactionactionpanel extends Module
 		{
 			$input_nav_pre['ui_element_type'] = 'submit';
 			$input_nav_pre['ui_element_name'] = 'transaction_nav_prev';
-			$input_nav_pre['ui_element_label'] = '<  Browse Previous Step';
+			$input_nav_pre['ui_element_label'] = '<  浏览上一步';
 			$ui_list[] = $input_nav_pre;
 		}
 		
-		$sql = 'select * from '._DB_PREFIX_.'z_service_product where id_product = '.$id_product;
-		$servicetypes = $db->ExecuteS($sql);
 		
-		if(count($servicetypes) == 1)
+		$service_type = null;
+		$current_step = null;
+		$steptype = null;
+		$id_product = null;
+		$action_partner = null;
+		$handler_class = null;
+		
+		$this->getRelevantInfo($params['id_transaction'], $service_type, $current_step,
+				$steptype, $id_product, $action_partner, $handler_class);
+		
+		if($handler_class == null)
+			return '';
+		
+
+		$sql = 'select * from '._DB_PREFIX_.'z_service_step where id_service_type = '.$service_type.' and id_step = '.$transacton['current_step'];
+		$nextsteps = $db->ExecuteS($sql);
+			
+		if(count($nextsteps) == 1)
 		{
-			$sql = 'select * from '._DB_PREFIX_.'z_service_step where id_service_type = '.$servicetypes[0]['id_service_type'].' and id_step = '.$transacton['current_step'];
-			$nextsteps = $db->ExecuteS($sql);
+			$nextstep = $nextsteps[0]['next_step_id'];
 				
-			if(count($nextsteps) == 1)
+			if($nextstep != -1)
 			{
-				$nextstep = $nextsteps[0]['next_step_id'];
-					
-				if($nextstep != -1)
-				{
-					$input_nav_nxt['ui_element_type'] = 'submit';
-					$input_nav_nxt['ui_element_name'] = 'transaction_nav_next';
-					$input_nav_nxt['ui_element_label'] = 'Browse Next Step  >';
-					$ui_list[] = $input_nav_nxt;
-				}
+				$input_nav_nxt['ui_element_type'] = 'submit';
+				$input_nav_nxt['ui_element_name'] = 'transaction_nav_next';
+				$input_nav_nxt['ui_element_label'] = '浏览下一步  >';
+				$ui_list[] = $input_nav_nxt;
 			}
-		}
-		
+		}		
 
 		return $this->displayTransactionDetail($transacton, false, false, $ui_list);
 	}
@@ -489,22 +497,28 @@ class transactionactionpanel extends Module
 		$actionbutton = Tools::getValue ( "actionbutton" );
 		
 		$sql = 'select * from ' . _DB_PREFIX_ . 'z_transaction_context where id_transaction = "' . $transaction_id . '"';
-		$context = $db->ExecuteS ( $sql );
+		$context_raw = $db->ExecuteS ( $sql );
 		
 		$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_mapping where id_step_type = ' . $steptype . ' and id_service_type = ' . $service_type . ' and id_step = ' . $current_step . ' and direction = 0';
 		$mappings = $db->ExecuteS ( $sql );
+		
+		foreach($context_raw as $context_row)
+		{
+			$param_name = $context_row['param_name'];
+			$context[$param_name] = $context_row['param_value'];
+		}
 		
 		foreach($mappings as $mapping)
 		{
 			if(!$mapping['regex'])
 			{
-				$context_param_value = $context_params[$mapping['context_para_name']];
+				$context_param_value = $context[$mapping['context_para_name']];
 				if($context_param_value != null)
 				{
 					$local_params[$mapping['local_para_name']] = $context_param_value;
 				}
 			}else{
-				foreach($context_params as $key => $value)
+				foreach($context as $key => $value)
 				{
 					if(preg_match('/'.$mapping['context_para_name'].'/', $key, $maches))
 					{
@@ -528,6 +542,8 @@ class transactionactionpanel extends Module
 		{
 			$local_params[$service_step_param['param_name']] = $service_step_param['param_value'];
 		}
+		
+		$local_params['transaction_id'] = $transaction_id;
 		
 		$return = AbstractHandler::PROCESS_SUCCESS;
 		
