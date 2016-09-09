@@ -72,18 +72,18 @@ class transactionactionpanel extends Module
 	
 	public function displayProductDemoPanel($params){
 		$db = Db::getInstance();
-		
-		$id_product = ((is_a($params['product'], 'Product'))?$params['product']->id:$params['product']);
-		
-		$sql = 'select * from '._DB_PREFIX_.'z_demo_transaction where id_product = '.$id_product;
-		$demo_transactions = $db->ExecuteS($sql);
 
-		$sql = 'select * from '._DB_PREFIX_.'z_transaction where id_transaction = "'.$demo_transactions[0]['id_transaction'].'"';
+		$sql = 'select * from '._DB_PREFIX_.'z_transaction where id_transaction = "'.$params['id_transaction'].'"';
 		$transactions = $db->ExecuteS($sql);
 
 		$transacton = $transactions[0];
 
 		$transacton['current_step'] = (isset($params['id_step']))? $params['id_step']:1;
+		
+		$input_currentstep['ui_element_type'] = 'hidden';
+		$input_currentstep['ui_element_name'] = 'current_step';
+		$input_currentstep['ui_element_value'] = $transacton['current_step'];
+		$ui_list[] = $input_currentstep;
 
 		if($transacton['current_step'] != '1')
 		{
@@ -122,6 +122,15 @@ class transactionactionpanel extends Module
 	
 	public function hookdisplayProductTabContent($params)
 	{
+		$db = Db::getInstance();
+		
+		$id_product = $params['product']->id;
+		
+		$sql = 'select * from '._DB_PREFIX_.'z_demo_transaction where id_product = '.$id_product;
+		$demo_transactions = $db->ExecuteS($sql);
+		
+		$params['id_transaction'] = $demo_transactions[0]['id_transaction'];
+		
 		$demo_block = $this->displayProductDemoPanel($params);
 			
 		$this->smarty->assign(array(
@@ -155,195 +164,180 @@ class transactionactionpanel extends Module
 		
 		$db = Db::getInstance();
 		
-		$id_product = $transaction["id_product"];
-		$sql = 'select * from '._DB_PREFIX_.'z_service_product where id_product = '.$id_product;
-			
-		$service_products = $db->ExecuteS($sql);
+		$service_type = null;
+		$current_step = $transaction['current_step']; //for the transaction demo
+		$id_step_type = null;
+		$id_product = null;
+		$action_partner = null;
+		$handler_class = null;
 		
-		if(!$service_products)
-			continue;
+		$this->getRelevantInfo($transaction['id_transaction'], $service_type, $current_step,
+				$id_step_type, $id_product, $action_partner, $handler_class);
+		
+		if($handler_class == null)
+			return '';
 				
-		//we should only have one product for each transaction, loop here is not really necessary, we use the service product to find out
-		//the service type, together with step id we can find out step type
-		foreach ($service_products as $servie_product)
-		{
-			$sql = 'select * from '._DB_PREFIX_.'z_service_step where id_service_type = '
-					.$servie_product['id_service_type'].' AND id_step = '.$transaction['current_step'];
+		$sql = 'select * from '._DB_PREFIX_.'z_service_step where id_service_type = '
+				.$service_type.' AND id_step = '.$current_step;
 						
-			$service_steps = $db->ExecuteS($sql);
+		$service_steps = $db->ExecuteS($sql);
 
-			if(count($service_steps) == 0)
-				continue;
+		if(count($service_steps) == 0)
+			return '';
+		
+		$service_step = $service_steps[0];
+		$instruction = $service_step["instruction"];
+		$description = $service_step["description"];
+		
+		$handler = new $handler_class();
 
-			foreach ($service_steps as $service_step)
+		$sql = 'select * from '._DB_PREFIX_.'z_transaction_context where id_transaction = "'.$transaction['id_transaction'].'"';
+		$context_raw = $db->ExecuteS($sql);			
+				
+		foreach($context_raw as $context_row)
+		{
+			$param_name = $context_row['param_name'];
+			$context_params[$param_name] = $context_row['param_value'];
+		}
+				
+		$sql = 'select * from '._DB_PREFIX_.'z_service_step_mapping where id_step_type = '.$id_step_type
+		.' and id_service_type = '.$service_type.' and id_step = '.$current_step.' and  direction = 0';
+				
+		$mappings = $db->ExecuteS($sql);
+		foreach($mappings as $mapping)
+		{
+			if(!$mapping['regex'])
 			{
-				$id_step_type = $service_step["id_step_type"];
-				$action_partner = $service_step["action_partner"];
-				$instruction = $service_step["instruction"];
-				$description = $service_step["description"];
+				$context_param_value = $context_params[$mapping['context_para_name']];
+				if($context_param_value != null)
+				{
+					$local_params[$mapping['local_para_name']] = $context_param_value;
+				}
+			}else{					
+				foreach($context_params as $key => $value)
+				{
+					if(preg_match('/'.$mapping['context_para_name'].'/', $key, $maches))
+					{
+						for($i = 1; $i < count($maches); $i++)
+						{
+							$param_name = str_replace('{'.$i.'}', $maches[$i], $mapping['local_para_name']);
+							$local_params[$param_name] = $value;
+						}
+					}
+				}
+			}
+		}
+				
+		$local_params['transaction_id'] = $transaction['id_transaction'];
+				
+		$sql = 'select * from '._DB_PREFIX_.'z_product_params where id_product = '.$id_product;
+		$service_params = $db->ExecuteS($sql);
+				
+		$sql = 'select * from '. _DB_PREFIX_.'z_service_step_param where id_service_type = '.$service_type.' and id_step = '.$current_step;
+		$service_step_params = $db->ExecuteS ( $sql );
+		
+		foreach($service_step_params as $service_step_param)
+		{
+			$local_params[$service_step_param['param_name']] = $service_step_param['param_value'];
+		}
+		
+		$statusstring = $handler->getReadableStatusString($local_params, $service_params);
+		
+		$step_ui = array();
+		if($action_partner == $is_admin)
+		{
+			$sql = 'select * from '._DB_PREFIX_.'z_step_type_ui where id_step_type = '.$id_step_type.' order by sequence';
+			$step_ui = $db->ExecuteS($sql);
+			
+			$additional_uis = $handler->getAdditionalInputUIElements($local_params, $service_params);
+			if($additional_uis != null)
+			{
+				$step_ui = array_merge($step_ui, $additional_uis);
+			}
+		}else{
+			$additional_uis = $handler->getAdditionalInputUIElementsNonAction($local_params, $service_params);
+			if($additional_uis != null)
+			{
+				$step_ui = array_merge($step_ui, $additional_uis);
+			}
+		}
+		
+		$additional_uis = $handler->getAdditionalStatusUIElements($local_params, $service_params);
+		if($additional_uis != null)
+		{
+			$step_ui = array_merge($step_ui, $additional_uis);
+		} 
+		
 
-
-				$sql = 'select * from '._DB_PREFIX_.'z_step_type where id_step_type = '.$id_step_type;
-				$step_types = $db->ExecuteS($sql);
-				
-				$sql = 'select * from '._DB_PREFIX_.'z_transaction_context where id_transaction = "'.$transaction['id_transaction'].'"';
-				$context_raw = $db->ExecuteS($sql);			
-				
-				foreach($context_raw as $context_row)
+		$sql = 'select * from '._DB_PREFIX_.'z_service_step where id_service_type = '
+				.$service_type.' order by id_step';
+		
+		$all_service_steps = $db->ExecuteS($sql);
+			
+		$product_name = Product::getProductName($id_product);
+			
+			
+		$sql = 'select * from '._DB_PREFIX_.'z_service_public_params where id_service_type = '.$service_type;
+		$all_public_params = $db->ExecuteS($sql);
+		
+		foreach($all_public_params as $all_public_param)
+		{
+			if($all_public_param['regex'])
+			{
+				foreach($context_params as $key => $value)
 				{
-					$param_name = $context_row['param_name'];
-					$context_params[$param_name] = $context_row['param_value'];
-				}
-				
-				$sql = 'select * from '._DB_PREFIX_.'z_service_step_mapping where id_step_type = '.$id_step_type
-				.' and id_service_type = '.$servie_product['id_service_type'].' and id_step = '.$transaction['current_step'].' and  direction = 0';
-				
-				$mappings = $db->ExecuteS($sql);
-				foreach($mappings as $mapping)
-				{
-					if(!$mapping['regex'])
+					if(preg_match('/'.$all_public_param['param_name'].'/', $key, $maches));
 					{
-						$context_param_value = $context_params[$mapping['context_para_name']];
-						if($context_param_value != null)
+						for($i = 1; $i < count($maches); $i++)
 						{
-							$local_params[$mapping['local_para_name']] = $context_param_value;
-						}
-					}else{					
-						foreach($context_params as $key => $value)
-						{
-							if(preg_match('/'.$mapping['context_para_name'].'/', $key, $maches))
-							{
-								for($i = 1; $i < count($maches); $i++)
-								{
-									$param_name = str_replace('{'.$i.'}', $maches[$i], $mapping['local_para_name']);
-									$local_params[$param_name] = $value;
-								}
-							}
+							$param_display_name = str_replace('{'.$i.'}', $maches[$i], $all_public_param['param_display_name']);
+							$public_params[] = array(
+									"value" => $value,
+									"displayName" => $param_display_name
+							); 
 						}
 					}
 				}
+			}else{
+				$displayName = $all_public_param['param_display_name'];
+				$value = $context_params[$all_public_param['param_name']];
 				
-				$local_params['transaction_id'] = $transaction['id_transaction'];
-				
-				$handler_class = $step_types[0]["step_handler"];
-				$handler = new $handler_class();
-				
-				
-				$sql = 'select * from '._DB_PREFIX_.'z_product_params where id_product = '.$id_product;
-				$service_params = $db->ExecuteS($sql);
-				
-				$sql = 'select * from '. _DB_PREFIX_.'z_service_step_param where id_service_type = '.$servie_product['id_service_type'].' and id_step = '.$transaction['current_step'] ;
-				$service_step_params = $db->ExecuteS ( $sql );
-				
-				foreach($service_step_params as $service_step_param)
+				if(isset($value))
 				{
-					$local_params[$service_step_param['param_name']] = $service_step_param['param_value'];
-				}
-				
-				$statusstring = $handler->getReadableStatusString($local_params, $service_params);
-				
-				$step_ui = array();
-				if($action_partner == $is_admin)
-				{
-					$sql = 'select * from '._DB_PREFIX_.'z_step_type_ui where id_step_type = '.$id_step_type.' order by sequence';
-					$step_ui = $db->ExecuteS($sql);
-					
-					$additional_uis = $handler->getAdditionalInputUIElements($local_params, $service_params);
-					if($additional_uis != null)
-					{
-						$step_ui = array_merge($step_ui, $additional_uis);
-					}
-				}else{
-					$additional_uis = $handler->getAdditionalInputUIElementsNonAction($local_params, $service_params);
-					if($additional_uis != null)
-					{
-						$step_ui = array_merge($step_ui, $additional_uis);
-					}
-				}
-				
-				$additional_uis = $handler->getAdditionalStatusUIElements($local_params, $service_params);
-				if($additional_uis != null)
-				{
-					$step_ui = array_merge($step_ui, $additional_uis);
-				} 
-				
-				if(count($step_types) == 1)
-				{
-					$sql = 'select * from '._DB_PREFIX_.'z_service_step where id_service_type = '
-							.$servie_product['id_service_type'].' order by id_step';
-					
-					$all_service_steps = $db->ExecuteS($sql);
-					
-					$product_name = Product::getProductName($id_product);
-					
-					
-					$sql = 'select * from '._DB_PREFIX_.'z_service_public_params where id_service_type = '.$servie_product['id_service_type'];
-					$all_public_params = $db->ExecuteS($sql);
-					
-					foreach($all_public_params as $all_public_param)
-					{
-						if($all_public_param['regex'])
-						{
-							foreach($context_params as $key => $value)
-							{
-								if(preg_match('/'.$all_public_param['param_name'].'/', $key, $maches));
-								{
-									for($i = 1; $i < count($maches); $i++)
-									{
-										$param_display_name = str_replace('{'.$i.'}', $maches[$i], $all_public_param['param_display_name']);
-										$public_params[] = array(
-												"value" => $value,
-												"displayName" => $param_display_name
-										); 
-									}
-								}
-							}
-						}else{
-							$displayName = $all_public_param['param_display_name'];
-							$value = $context_params[$all_public_param['param_name']];
-							
-							if(isset($value))
-							{
-								$public_params[] = array(
-										"value" => $value,
-										"displayName" => $displayName
-								);
-							}
-						}
-					}
-					
-					$token = '';
-					if($is_admin)
-						$token=Tools::getAdminToken('AdminTransaction'.
-								intval(Tab::getIdFromClassName('AdminTransaction')).
-								intval(Context::getContext()->employee->id));
-					
-					$transactions_ui = array("id_transaction" => $transaction['id_transaction'],
-							"current_step" => $transaction['current_step'],
-							"instruction" => $instruction,
-							"servicetype" => $servie_product['id_service_type'],
-							"description" => $description,
-							"id_product" => $id_product,
-							"show_instruction" => ($action_partner == $is_admin),
-							"steptype" => $id_step_type,
-							"stephandler" => $step_types[0]["step_handler"],
-							"ui_list" => $step_ui,
-							"controller" => $is_admin?'AdminTransaction':'ProcessAction',
-							"is_admin" => $is_admin,
-							"token" => $token,
-							"base_url" => _PS_BASE_URL_.__PS_BASE_URI__.($is_admin?'admin350/':''),
-							"status_string" => $statusstring,
-							"service_steps" => $all_service_steps,
-							"product_name" => $product_name,
-							"show_product_name" => $showProductName,
-							"show_submit_button" => $showSubmit,
-							"extended_buttons" => $extendedButtons,
-							"public_params" => isset($public_params)?$public_params:null,
-							"tag" => (isset($context_params) && isset($context_params["tag"]))?$context_params["tag"]:''
+					$public_params[] = array(
+							"value" => $value,
+							"displayName" => $displayName
 					);
 				}
 			}
 		}
+		
+		$token = '';
+		if($is_admin)
+			$token=Tools::getAdminToken('AdminTransaction'.
+					intval(Tab::getIdFromClassName('AdminTransaction')).
+					intval(Context::getContext()->employee->id));
+		
+		$transactions_ui = array("id_transaction" => $transaction['id_transaction'],
+				"instruction" => $instruction,
+				"description" => $description,
+				"show_instruction" => ($action_partner == $is_admin),
+				"current_step" => $current_step,
+				"ui_list" => $step_ui,
+				"controller" => $is_admin?'AdminTransaction':'ProcessAction',
+				"is_admin" => $is_admin,
+				"token" => $token,
+				"base_url" => _PS_BASE_URL_.__PS_BASE_URI__.($is_admin?'admin350/':''),
+				"status_string" => $statusstring,
+				"service_steps" => $all_service_steps,
+				"product_name" => $product_name,
+				"show_product_name" => $showProductName,
+				"show_submit_button" => $showSubmit,
+				"extended_buttons" => $extendedButtons,
+				"public_params" => isset($public_params)?$public_params:null,
+				"tag" => (isset($context_params) && isset($context_params["tag"]))?$context_params["tag"]:''
+		);
+
 		
 		if($transactions_ui != null)
 		{
@@ -380,7 +374,7 @@ class transactionactionpanel extends Module
 		
 		$transactions = $db->ExecuteS($sql);
 		
-		if(!$transactions || count(transactions) == 0)
+		if(!$transactions || count($transactions) == 0)
 			return '';
 		
 		$output = '<div id="transation_action_panel" class="transation_action_panel">';
@@ -402,7 +396,7 @@ class transactionactionpanel extends Module
 		
 		$transactions = $db->ExecuteS($sql);
 		
-		if(!$transactions || count(transactions) == 0)
+		if(!$transactions || count($transactions) == 0)
 			return '';
 		
 		$output = '<div id="transation_action_panel" class="transation_action_panel">';
@@ -416,27 +410,90 @@ class transactionactionpanel extends Module
 		return $output = $output."</div>";
 	}
 	
+	
+	public function getRelevantInfo($transaction_id, &$service_type, &$current_step, &$id_step_type, 
+			                         &$id_product, &$action_partner, &$step_handler)
+	{
+		$db = Db::getInstance();
+		
+		$sql = 'select * from '._DB_PREFIX_.'z_transaction where id_transaction = "'.$transaction_id.'"';
+		$transactions = $db->ExecuteS($sql);
+		
+		if(!$transactions || count($transactions) == 0)
+			return;
+		
+		$transaction = $transactions[0];
+		
+		$current_step = ($current_step == null?$transaction['current_step']:$current_step);
+		
+		$id_product = $transaction["id_product"];
+		$sql = 'select * from '._DB_PREFIX_.'z_service_product where id_product = '.$id_product;
+			
+		$service_products = $db->ExecuteS($sql);
+		
+		if(!$service_products || count($service_products) == 0)
+			return;
+		
+		$servie_product = $service_products[0];
+		
+		$service_type = $servie_product['id_service_type'];
+		
+		
+		$sql = 'select * from '._DB_PREFIX_.'z_service_step where id_service_type = '
+				.$servie_product['id_service_type'].' AND id_step = '.$current_step;
+
+		$service_steps = $db->ExecuteS($sql);
+
+		if(!$service_steps || count($service_steps) == 0)
+			return;
+		
+		$service_step = $service_steps[0];
+		
+		$id_step_type = $service_step["id_step_type"];
+		$action_partner = $service_step["action_partner"];
+		
+		$sql = 'select * from '._DB_PREFIX_.'z_step_type where id_step_type = '.$id_step_type;
+		$step_types = $db->ExecuteS($sql);
+		
+		if(!$step_types || count($step_types) == 0)
+			return;
+		
+		$step_type = $step_types[0];
+			
+		$step_handler = $step_type["step_handler"];
+	}
+	
 	public function processActions(){
+		$is_admin = (defined('_PS_ADMIN_DIR_') || (int)(Tools::getValue("is_admin", 0)))?1:0;
+		
 		$db = Db::getInstance ();
 		
 		$ajaxReturn = array();
 		
-		$handler_class = Tools::getValue ( "stephandler" );
-		$handler = new $handler_class ();
-		
-		$service_type = Tools::getValue ( "servicetype" );
 		$transaction_id = Tools::getValue ( "transaction_id" );
-		$current_step = Tools::getValue ( "current_step" );
-		$steptype = Tools::getValue ( "steptype" );
-		$id_product = Tools::getValue ( "id_product" );
+		
+		$service_type = null;
+		$current_step = null;
+		$steptype = null;
+		$id_product = null;
+		$action_partner = null;
+		$handler_class = null;
+		
+		$this->getRelevantInfo($transaction_id, $service_type, $current_step, 
+				               $steptype, $id_product, $action_partner, $handler_class);
+		
+		if($handler_class == null)
+			return $ajaxReturn ['errors'] = 'Invalid Action Triggered';
+		
+		$handler = new $handler_class ();
 		$actionbutton = Tools::getValue ( "actionbutton" );
 		
 		$sql = 'select * from ' . _DB_PREFIX_ . 'z_transaction_context where id_transaction = "' . $transaction_id . '"';
 		$context = $db->ExecuteS ( $sql );
 		
 		$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_mapping where id_step_type = ' . $steptype . ' and id_service_type = ' . $service_type . ' and id_step = ' . $current_step . ' and direction = 0';
-		
 		$mappings = $db->ExecuteS ( $sql );
+		
 		foreach($mappings as $mapping)
 		{
 			if(!$mapping['regex'])
@@ -474,7 +531,7 @@ class transactionactionpanel extends Module
 		
 		$return = AbstractHandler::PROCESS_SUCCESS;
 		
-		if ($actionbutton == null)
+		if ($action_partner == $is_admin)
 			$return = $handler->processUIInputs ( $local_params, $outputs, $service_params, $errorinfo );
 		else
 			$return = $handler->processUIInputsNonAction ( $local_params, $outputs, $service_params, $errorinfo );
@@ -508,7 +565,7 @@ class transactionactionpanel extends Module
 				}
 			}
 			
-			if ($actionbutton == null) {
+			if ($action_partner == $is_admin && $actionbutton == null) {
 				$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step where id_service_type = ' . $service_type . ' and id_step = ' . $current_step;
 				$nextsteps = $db->ExecuteS ( $sql );
 				

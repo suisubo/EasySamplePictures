@@ -20,7 +20,7 @@
 		<input type="hidden" name="business" value="subo.sui@gmail.com" />
 		<input type="hidden" name="currency_code" value="USD" />
 		<input type="hidden" name="amount" value="{$total}" />
-		<input type="hidden" name="transaction_id" value="{$transaction_id}" />			
+		<input type="hidden" name="custom" value="{$custom}" />
 		<input type="hidden" name="notify_url" value="{$notify_url}" />
 		<input type="hidden" name="return" value="{$return_url}" />
 		<input type="hidden" name="cancel_return" value="{$cancel_url}" />

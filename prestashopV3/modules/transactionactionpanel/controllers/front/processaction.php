@@ -30,7 +30,6 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 	
 	public function displayAjaxDemo()
 	{
-		$params['product'] = Tools::getValue('id_product');
 		$actionbutton = Tools::getValue('actionbutton');
 		$current_step = Tools::getValue('current_step');
 		
@@ -40,7 +39,9 @@ class TransactionActionPanelProcessActionModuleFrontController extends ModuleFro
 			$current_step = $current_step - 1;
 		
 		$params['id_step'] = $current_step;
-			
+		
+		$params['id_transaction'] = Tools::getValue('transaction_id');
+		
 		$moduleInstance = Module::getInstanceByName('transactionactionpanel');
 		$ajaxReturn['next_step'] = $moduleInstance->displayProductDemoPanel($params);
 			

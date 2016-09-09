@@ -55,22 +55,16 @@ PrestaShop SA *}
 					{/if}
 					<input type="hidden" name="transaction_id"
 						value="{$transaction['id_transaction']}"><input type="hidden" name="base_url"
-						value="{$transaction['base_url']}"> <input type="hidden"
-						name="current_step" value="{$transaction['current_step']}"> 
+						value="{$transaction['base_url']}">  
 						<input type="hidden"
-						name="is_admin" value="{$transaction['is_admin']}"><input
-						type="hidden" name="stephandler"
-						value="{$transaction['stephandler']}"> <input type="hidden"
-						name="steptype" value="{$transaction['steptype']}"> <input
-						type="hidden" name="servicetype"
-						value="{$transaction['servicetype']}"> <input type="hidden"
-						name="id_product" value="{$transaction['id_product']}"> <input
+						name="is_admin" value="{$transaction['is_admin']}">
+						<input
 						type="hidden" name="ajax" value="true"> <input type="hidden"
 						name="fc" value="module"> <input type="hidden" name="module"
 						value="transactionactionpanel"> <input type="hidden"
 						name="controller" value="{$transaction['controller']}">
 						<input type="hidden"
-						name="token" value="{$transaction['token']}">
+						name="token" value="{$transaction['token']}">					
 						<br> {if
 					isset($transaction.ui_list)}{foreach from=$transaction.ui_list
 					item=ui_item name=ui_list} {if $ui_item.ui_element_type == "radio"}
@@ -81,6 +75,7 @@ PrestaShop SA *}
 					item=ui_item name=ui_list} {if $ui_item.ui_element_type == "text"}
 					<input type="text" name="{$ui_item.ui_element_name}"
 						placeholder="{$ui_item.ui_element_label}"> {/if} {/foreach}
+					
 					{foreach from=$transaction.ui_list item=ui_item name=ui_list} {if
 					$ui_item.ui_element_type == "custom"}
 					{$ui_item.ui_element_custom_content} {/if} {/foreach} {foreach
@@ -98,7 +93,11 @@ PrestaShop SA *}
 						id="transation_submit_{$transaction['id_transaction']}"
 						type="button" name="{$ui_item.ui_element_name}"
 						value="{$ui_item.ui_element_label}"> {/if} {/foreach}{/if}{/if}
-					<div class='transaction_demo_nav'>				
+					<div class='transaction_demo_nav'>
+					{foreach from=$transaction.extended_buttons item=extended_button name=ui_list} {if
+					$extended_button.ui_element_type == "hidden"}
+					<input type="hidden" name="{$extended_button.ui_element_name}"
+						value ="{$extended_button.ui_element_value}"> {/if} {/foreach}				
 				    {foreach from=$transaction.extended_buttons item=extended_button name=extended_buttons} {if
 					$extended_button.ui_element_type == "submit"} <input
 						onclick="submit_transaction_panel_inputs()"
