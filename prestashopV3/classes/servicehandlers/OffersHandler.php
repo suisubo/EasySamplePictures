@@ -19,6 +19,8 @@ class OffersHandlerCore extends AbstractHandler
 	}
 	
 	public function getAdditionalInputUIElements($context_inputs, $service_parameters){
+		$ui_list = array();
+		
 		foreach($context_inputs as $name => $value)
 		{
 			if (preg_match ('/offer_(\d+)/', $name, $maches )) 

@@ -198,57 +198,14 @@ class transactionactionpanel extends Module
 		$description = $service_step["description"];
 		
 		$handler = new $handler_class();
-
-		$sql = 'select * from '._DB_PREFIX_.'z_transaction_context where id_transaction = "'.$transaction['id_transaction'].'"';
-		$context_raw = $db->ExecuteS($sql);			
-				
-		foreach($context_raw as $context_row)
-		{
-			$param_name = $context_row['param_name'];
-			$context_params[$param_name] = $context_row['param_value'];
-		}
-				
-		$sql = 'select * from '._DB_PREFIX_.'z_service_step_mapping where id_step_type = '.$id_step_type
-		.' and id_service_type = '.$service_type.' and id_step = '.$current_step.' and  direction = 0';
-				
-		$mappings = $db->ExecuteS($sql);
-		foreach($mappings as $mapping)
-		{
-			if(!$mapping['regex'])
-			{
-				$context_param_value = $context_params[$mapping['context_para_name']];
-				if($context_param_value != null)
-				{
-					$local_params[$mapping['local_para_name']] = $context_param_value;
-				}
-			}else{					
-				foreach($context_params as $key => $value)
-				{
-					if(preg_match('/'.$mapping['context_para_name'].'/', $key, $maches))
-					{
-						for($i = 1; $i < count($maches); $i++)
-						{
-							$param_name = str_replace('{'.$i.'}', $maches[$i], $mapping['local_para_name']);
-							$local_params[$param_name] = $value;
-						}
-					}
-				}
-			}
-		}
-				
-		$local_params['transaction_id'] = $transaction['id_transaction'];
+		
+		$local_params = array();
+		
+		$this->getlocalcontext($transaction['id_transaction'], $local_params, $service_type, $current_step, $id_step_type);		
 				
 		$sql = 'select * from '._DB_PREFIX_.'z_product_params where id_product = '.$id_product;
 		$service_params = $db->ExecuteS($sql);
 				
-		$sql = 'select * from '. _DB_PREFIX_.'z_service_step_param where id_service_type = '.$service_type.' and id_step = '.$current_step;
-		$service_step_params = $db->ExecuteS ( $sql );
-		
-		foreach($service_step_params as $service_step_param)
-		{
-			$local_params[$service_step_param['param_name']] = $service_step_param['param_value'];
-		}
-		
 		$statusstring = $handler->getReadableStatusString($local_params, $service_params);
 		
 		$step_ui = array();
@@ -471,6 +428,63 @@ class transactionactionpanel extends Module
 		$step_handler = $step_type["step_handler"];
 	}
 	
+	public function getlocalcontext($id_transaction, &$local_params, $service_type, $current_step, $steptype)
+	{
+		$db = Db::getInstance ();
+		
+		$sql = 'select * from ' . _DB_PREFIX_ . 'z_transaction_context where id_transaction = "' . $id_transaction . '"';
+		$context_raw = $db->ExecuteS ( $sql );
+		
+		$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_mapping where id_step_type = ' . $steptype . ' and id_service_type = ' . $service_type . ' and id_step = ' . $current_step;
+		$mappings = $db->ExecuteS ( $sql );
+		
+		$context = array();
+		
+		foreach($context_raw as $context_row)
+		{
+			$param_name = $context_row['param_name'];
+			$context[$param_name] = $context_row['param_value'];
+		}
+		
+		foreach($mappings as $mapping)
+		{
+			if(!$mapping['regex']) //normal mapping doesn't care direction
+			{
+				if(!array_key_exists($mapping['context_para_name'], $context))
+					continue;
+				
+				$context_param_value = $context[$mapping['context_para_name']];
+				$local_params[$mapping['local_para_name']] = $context_param_value;
+				
+			}else{
+				if($mapping ['direction'] == 1) //regex style care direction
+					continue;
+				
+				foreach($context as $key => $value)
+				{
+					if(preg_match('/'.$mapping['context_para_name'].'/', $key, $maches))
+					{
+						for($i = 1; $i < count($maches); $i++)
+						{
+							$param_name = str_replace('{'.$i.'}', $maches[$i], $mapping['local_para_name']);
+							$local_params[$param_name] = $value;
+						}
+					}
+				}
+			}
+		}
+		
+		$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_param where id_service_type = '.$service_type.' and id_step = '.$current_step ;
+		$service_step_params = $db->ExecuteS ( $sql );
+		
+		foreach($service_step_params as $service_step_param)
+		{
+			$local_params[$service_step_param['param_name']] = $service_step_param['param_value'];
+		}
+		
+		$local_params['transaction_id'] = $id_transaction;
+	}
+	
 	public function processActions(){
 		$is_admin = (defined('_PS_ADMIN_DIR_') || (int)(Tools::getValue("is_admin", 0)))?1:0;
 		
@@ -494,56 +508,14 @@ class transactionactionpanel extends Module
 			return $ajaxReturn ['errors'] = 'Invalid Action Triggered';
 		
 		$handler = new $handler_class ();
-		$actionbutton = Tools::getValue ( "actionbutton" );
-		
-		$sql = 'select * from ' . _DB_PREFIX_ . 'z_transaction_context where id_transaction = "' . $transaction_id . '"';
-		$context_raw = $db->ExecuteS ( $sql );
-		
-		$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_mapping where id_step_type = ' . $steptype . ' and id_service_type = ' . $service_type . ' and id_step = ' . $current_step . ' and direction = 0';
-		$mappings = $db->ExecuteS ( $sql );
-		
-		foreach($context_raw as $context_row)
-		{
-			$param_name = $context_row['param_name'];
-			$context[$param_name] = $context_row['param_value'];
-		}
-		
-		foreach($mappings as $mapping)
-		{
-			if(!$mapping['regex'])
-			{
-				$context_param_value = $context[$mapping['context_para_name']];
-				if($context_param_value != null)
-				{
-					$local_params[$mapping['local_para_name']] = $context_param_value;
-				}
-			}else{
-				foreach($context as $key => $value)
-				{
-					if(preg_match('/'.$mapping['context_para_name'].'/', $key, $maches))
-					{
-						for($i = 1; $i < count($maches); $i++)
-						{
-							$param_name = str_replace('{'.$i.'}', $maches[$i], $mapping['local_para_name']);
-							$local_params[$param_name] = $value;
-						}
-					}
-				}
-			}
-		}
+		$actionbutton = Tools::getValue ( "actionbutton" );		
 		
 		$sql = 'select * from ' . _DB_PREFIX_ . 'z_product_params where id_product = ' . $id_product;
-		$service_params = $db->ExecuteS ( $sql );
+		$service_params = $db->ExecuteS ( $sql );	
 		
-		$sql = 'select * from ' . _DB_PREFIX_ . 'z_service_step_param where id_service_type = '.$service_type.' and id_step = '.$current_step ;
-		$service_step_params = $db->ExecuteS ( $sql );
+		$local_params = array();
 		
-		foreach($service_step_params as $service_step_param)
-		{
-			$local_params[$service_step_param['param_name']] = $service_step_param['param_value'];
-		}
-		
-		$local_params['transaction_id'] = $transaction_id;
+		$this->getlocalcontext($transaction_id, $local_params, $service_type, $current_step, $steptype);
 		
 		$return = AbstractHandler::PROCESS_SUCCESS;
 		
@@ -559,14 +531,15 @@ class transactionactionpanel extends Module
 			
 			foreach ( $mappings as $mapping ) {
 				if (! $mapping ['regex']) {
+					if(!array_key_exists($mapping ['local_para_name'], $outputs))
+						continue;
+					
 					$local_param_value = $outputs [$mapping ['local_para_name']];
-					if ($local_param_value != null) {
-						$context [$mapping ['context_para_name']] = $local_param_value;
+					$context [$mapping ['context_para_name']] = $local_param_value;
 						
-						$sql = "insert into " . _DB_PREFIX_ . "z_transaction_context (id_transaction, param_name, param_value) VALUES ('" . $transaction_id . "', '" . $mapping ['context_para_name'] . "', '" . $local_param_value . "') ON DUPLICATE KEY UPDATE " . "param_value = '" . $local_param_value . "'";
-						$db->ExecuteS ( $sql );
-					}
-				} else {
+					$sql = "insert into " . _DB_PREFIX_ . "z_transaction_context (id_transaction, param_name, param_value) VALUES ('" . $transaction_id . "', '" . $mapping ['context_para_name'] . "', '" . $local_param_value . "') ON DUPLICATE KEY UPDATE " . "param_value = '" . $local_param_value . "'";
+					$db->ExecuteS ( $sql );					
+				} else {					
 					foreach ( $outputs as $key => $value ) {
 						if (preg_match ( "/" . $mapping ['local_para_name'] . "/", $key, $maches )) {
 							for($i = 1; $i < count ( $maches ); $i ++) {

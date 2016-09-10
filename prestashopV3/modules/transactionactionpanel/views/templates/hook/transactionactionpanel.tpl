@@ -50,7 +50,7 @@ PrestaShop SA *}
 					{$ui_item.ui_element_form} {/if} {/foreach} 
 				<form id="msform" enctype="multipart/form-data">
 				    {if isset($transaction['status_string'])}
-				    <b>Current Status:</b> <br> 
+				    <b>当前状态</b> <br> 
 				    {$transaction['status_string']} <br>
 					{/if}
 					<input type="hidden" name="transaction_id"

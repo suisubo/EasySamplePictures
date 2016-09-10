@@ -49,33 +49,56 @@ class MakePaymentHandlerCore extends AbstractHandler
 				$currency = Tools::getValue ( 'mc_currency' );
 				
 				/* Step 4 - Determine the order status in accordance with the response from PayPal */
-				if (Tools::strtoupper ( Tools::getValue ( 'payment_status' ) ) == 'COMPLETED')
-					$order_status = ( int ) Configuration::get ( 'PS_OS_PAYMENT' );
-				elseif (Tools::strtoupper ( Tools::getValue ( 'payment_status' ) ) == 'PENDING')
-					$order_status = ( int ) Configuration::get ( 'PS_OS_PAYPAL' );
-				elseif (Tools::strtoupper ( Tools::getValue ( 'payment_status' ) ) == 'REFUNDED')
-					$order_status = ( int ) Configuration::get ( 'PS_OS_REFUND' );
-				else
-					$order_status = ( int ) Configuration::get ( 'PS_OS_ERROR' );
+// 				if (Tools::strtoupper ( Tools::getValue ( 'payment_status' ) ) == 'COMPLETED')
+// 					$order_status = ( int ) Configuration::get ( 'PS_OS_PAYMENT' );
+// 				elseif (Tools::strtoupper ( Tools::getValue ( 'payment_status' ) ) == 'PENDING')
+// 					$order_status = ( int ) Configuration::get ( 'PS_OS_PAYPAL' );
+// 				elseif (Tools::strtoupper ( Tools::getValue ( 'payment_status' ) ) == 'REFUNDED')
+// 					$order_status = ( int ) Configuration::get ( 'PS_OS_REFUND' );
+// 				else
+// 					$order_status = ( int ) Configuration::get ( 'PS_OS_ERROR' );
 				
+				$outputs['payment_method'] = 'Paypal';
+				$outputs['payment_amount'] = Tools::getValue ( 'mc_gross' );
+				$outputs['payment_txn_id'] = Tools::getValue ( 'txn_id' );
+				$outputs['payment_date'] = Tools::getValue ( 'payment_date' );
+				$outputs['payment_currency'] = Tools::getValue ( 'mc_currency' );
+				$outputs['payment_fee'] = Tools::getValue ( 'mc_fee' );
+				$outputs['payment_protection_eligibility'] = Tools::getValue ( 'protection_eligibility' );
+				$outputs['payment_address_status'] = Tools::getValue ( 'address_status' );
+				$outputs['payment_payer_id'] = Tools::getValue ( 'payer_id' );
+				$outputs['payment_payer_status'] = Tools::getValue ( 'payer_status' );
+				$outputs['payment_payer_email'] = Tools::getValue ( 'payer_email' );
+				$outputs['payment_receipt_id'] = Tools::getValue ( 'receipt_id' );
+				$outputs['payment_ipn_track_id'] = Tools::getValue ( 'ipn_track_id' );
+				$outputs['payment_verify_sign'] = Tools::getValue ( 'verify_sign' );
+				$outputs['payment_mode'] = Tools::getValue ( 'test_ipn' )?'Test (Sandbox)' : 'Live';
+				$outputs['payment_status'] = Tools::getValue ( 'payment_status' );
+				$outputs['payment_type'] = Tools::getValue ( 'payment_type' );
+				
+					
 				$payment_type = Tools::getValue('payment_type');
-				$message = 'Transaction ID: ' . Tools::getValue ( 'txn_id' ) . '
-								Payment Type: ' . $payment_type . '
-								Order time: ' . Tools::getValue ( 'payment_date' ) . '
-								Final amount charged: ' . Tools::getValue ( 'mc_gross' ) . '
-								Currency code: ' . Tools::getValue ( 'mc_currency' ) . '
-								PayPal fees: ' . ( float ) Tools::getValue ( 'mc_fee' ) . '
-								Protection Eligibility: ' . Tools::getValue ( 'protection_eligibility' ) . '
-								address status: ' . Tools::getValue ( 'address_status' ) . '
-								payer_id: ' . Tools::getValue ( 'payer_id' ) . '
-								payer_status: ' . Tools::getValue ( 'payer_status' ) . '
-								payer_email: ' . Tools::getValue ( 'payer_email' ) . '
-								receipt_id: ' . Tools::getValue ( 'receipt_id' ) . '
-								ipn_track_id: ' . Tools::getValue ( 'ipn_track_id' ) . '
-								verify_sign: ' . Tools::getValue ( 'verify_sign' ) . '
-								Mode: ' . (Tools::getValue ( 'test_ipn' ) ? 'Test (Sandbox)' : 'Live');
+				$transaction_log =     'Transaction ID: ' . $custom [0] . '
+						                step ID: ' . $custom [1] . '
+								        step ID: ' . $custom [1] . '
+								        Paypal Transaction ID: ' . Tools::getValue ( 'txn_id' ) . '
+								        payment status: '. Tools::getValue ( 'payment_status' ) .'
+										Payment Type: ' . $payment_type . '
+										Order time: ' . Tools::getValue ( 'payment_date' ) . '
+										Final amount charged: ' . Tools::getValue ( 'mc_gross' ) . '
+										Currency code: ' . Tools::getValue ( 'mc_currency' ) . '
+										PayPal fees: ' . ( float ) Tools::getValue ( 'mc_fee' ) . '
+										Protection Eligibility: ' . Tools::getValue ( 'protection_eligibility' ) . '
+										address status: ' . Tools::getValue ( 'address_status' ) . '
+										payer_id: ' . Tools::getValue ( 'payer_id' ) . '
+										payer_status: ' . Tools::getValue ( 'payer_status' ) . '
+										payer_email: ' . Tools::getValue ( 'payer_email' ) . '
+										receipt_id: ' . Tools::getValue ( 'receipt_id' ) . '
+										ipn_track_id: ' . Tools::getValue ( 'ipn_track_id' ) . '
+										verify_sign: ' . Tools::getValue ( 'verify_sign' ) . '
+										Mode: ' . (Tools::getValue ( 'test_ipn' ) ? 'Test (Sandbox)' : 'Live');
 				
-				error_log($message);
+				error_log($transaction_log);
 				
 				return AbstractHandler::PROCESS_SUCCESS;
 			}else{
@@ -86,7 +109,23 @@ class MakePaymentHandlerCore extends AbstractHandler
     }
     
 	public function getReadableStatusString($context_inputs, $service_parameters, $lang = null){
-		return null;
+		$Status = '<table>';
+		if(array_key_exists('payment_method', $context_inputs))
+		{
+			$Status = $Status.'<tr><td >付款信息收到，等待验证</td></tr>';
+			
+			$Status = $Status.'<tr><td ><b>付款方式：<b></td><td >'. $context_inputs['payment_method'] .'</td></tr>';
+			$Status = $Status.'<tr><td ><b>付款金额：<b></td><td >'. $context_inputs['payment_amount'] .'</td></tr>';
+			$Status = $Status.'<tr><td ><b>货币单位：<b></td><td >'. $context_inputs['payment_currency'] .'</td></tr>';
+			$Status = $Status.'<tr><td ><b>付款方：<b></td><td >'. $context_inputs['payment_payer_email'] .'</td></tr>';
+			$Status = $Status.'<tr><td ><b>日期：<b></td><td >'. $context_inputs['payment_date'] .'</td></tr>';
+			
+		} 
+		
+		$Status = $Status.'</table>'; 
+		error_log($Status);
+		
+		return $Status;
 	}
 	
 	public function getAdditionalStatusUIElements($context_inputs, $service_parameters){
