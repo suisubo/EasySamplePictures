@@ -18,7 +18,7 @@ abstract class AbstractHandlerCore
 		return AbstractHandler::PROCESS_SUCCESS;
 	}
 	
-    public function getReadableStatusString($context_inputs, $service_parameters, $lang)
+    public function getReadableStatusString($context_inputs, $service_parameters, $nonaction)
     {
     	return null;
     }

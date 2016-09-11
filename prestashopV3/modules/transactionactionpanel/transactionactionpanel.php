@@ -206,7 +206,7 @@ class transactionactionpanel extends Module
 		$sql = 'select * from '._DB_PREFIX_.'z_product_params where id_product = '.$id_product;
 		$service_params = $db->ExecuteS($sql);
 				
-		$statusstring = $handler->getReadableStatusString($local_params, $service_params);
+		$statusstring = $handler->getReadableStatusString($local_params, $service_params, !($action_partner == $is_admin));
 		
 		$step_ui = array();
 		if($action_partner == $is_admin)

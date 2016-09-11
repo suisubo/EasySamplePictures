@@ -32,7 +32,7 @@ PrestaShop SA *}
 		</ul>
 
 		<fieldset id="transation_form_{$transaction['id_transaction']}"
-			action="#" method="POST">
+			action="#" method="POST">			
 			<div id="error_{$transaction['id_transaction']}" class="transaction_error"></div>
 			<div class="transaction_container">
 			    <div class='transaction_right'>
@@ -45,14 +45,14 @@ PrestaShop SA *}
 					{/if}
 				</div>
 				<div class="transaction_left">
+				{if isset($transaction['status_string'])}
+<!-- 				    <font size="3" color="blue"><b>当前状态:</b></font> <br>  -->
+				    {$transaction['status_string']} <br>
+				{/if}
 				{foreach from=$transaction.ui_list item=ui_item name=ui_list} {if
 					$ui_item.ui_element_type == "form"}
 					{$ui_item.ui_element_form} {/if} {/foreach} 
-				<form id="msform" enctype="multipart/form-data">
-				    {if isset($transaction['status_string'])}
-				    <b>当前状态</b> <br> 
-				    {$transaction['status_string']} <br>
-					{/if}
+				<form id="msform" enctype="multipart/form-data">				    
 					<input type="hidden" name="transaction_id"
 						value="{$transaction['id_transaction']}"><input type="hidden" name="base_url"
 						value="{$transaction['base_url']}">  

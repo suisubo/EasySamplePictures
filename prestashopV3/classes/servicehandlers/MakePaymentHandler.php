@@ -104,27 +104,52 @@ class MakePaymentHandlerCore extends AbstractHandler
 			}else{
 				error_log('failed to invoke');
 			}
+			
+			if ($actionbutton == 'submit_payment_transaction') {
+				if(Tools::getValue('payment_method') == 'alipay' && (!array_key_exists('payment_method', $context_inputs)))
+				{
+					if(Tools::getValue ( 'txn_id' ) != null && strlen(Tools::getValue ( 'txn_id' )) > 15)
+					{
+						$outputs['payment_txn_id'] = Tools::getValue ( 'txn_id' );
+						$outputs['payment_method'] = 'Alipay';
+					}else{
+						$error_info = "请输入有效的交易流水号.";
+						return AbstractHandler::PROCESS_FAIL;
+					}
+				}else{
+					$error_info = "您已经通过Paypal付款，请等待确认.";
+					return AbstractHandler::PROCESS_FAIL;
+				}
+				
+				return AbstractHandler::PROCESS_SUCCESS;
+			}
 				
 		}
     }
     
-	public function getReadableStatusString($context_inputs, $service_parameters, $lang = null){
+	public function getReadableStatusString($context_inputs, $service_parameters, $nonaction){
 		$Status = '<table>';
 		if(array_key_exists('payment_method', $context_inputs))
 		{
-			$Status = $Status.'<tr><td >付款信息收到，等待验证</td></tr>';
+			$Status = $Status.'<tr><td ><b>付款信息收到，等待验证<b></td></tr>';
 			
 			$Status = $Status.'<tr><td ><b>付款方式：<b></td><td >'. $context_inputs['payment_method'] .'</td></tr>';
 			$Status = $Status.'<tr><td ><b>付款金额：<b></td><td >'. $context_inputs['payment_amount'] .'</td></tr>';
-			$Status = $Status.'<tr><td ><b>货币单位：<b></td><td >'. $context_inputs['payment_currency'] .'</td></tr>';
+			$Status = $Status.'<tr><td ><b>货币单位：<b></td><td >'. $context_inputs['payment_currency'] .'</td></tr>';			
 			$Status = $Status.'<tr><td ><b>付款方：<b></td><td >'. $context_inputs['payment_payer_email'] .'</td></tr>';
 			$Status = $Status.'<tr><td ><b>日期：<b></td><td >'. $context_inputs['payment_date'] .'</td></tr>';
+			
+			if(!$nonaction)
+			{
+				$Status = $Status.'<tr><td ><b>费用：<b></td><td >'. $context_inputs['payment_fee'] .'</td></tr>';
+				$Status = $Status.'<tr><td ><b>交易编号：<b></td><td >'. $context_inputs['payment_txn_id'] .'</td></tr>';
+				$Status = $Status.'<tr><td ><b>付款状态：<b></td><td >'. $context_inputs['payment_status'] .'</td></tr>';
+			}
 			
 		} 
 		
 		$Status = $Status.'</table>'; 
-		error_log($Status);
-		
+				
 		return $Status;
 	}
 	
@@ -164,13 +189,26 @@ class MakePaymentHandlerCore extends AbstractHandler
 		
 		$custom = $context_inputs['transaction_id'].';'.$current_step;
 		
+		$alippay_transaction_id = null;
+		
+		if($context_inputs['payment_method'] == 'Alipay')
+		{
+			if(array_key_exists('payment_txn_id', $context_inputs))
+			{
+				$alippay_transaction_id = $context_inputs['payment_txn_id'];
+			}
+		}
+		
 		Context::getContext()->smarty->assign(array(
 				'paypal_usa_action' => 'https://www'.(Configuration::get('PAYPAL_USA_SANDBOX') ? '.sandbox' : '').'.paypal.com/cgi-bin/webscr',
 				'total' => $total,
 				'custom' => $custom,
+				'alipay_trarnsaction_id' => $alippay_transaction_id,
+				'transaction_id' => $context_inputs['transaction_id'],
 				'cancel_url' => Context::getContext()->link->getPageLink('order.php',''),
 				'notify_url' => $link,
 				'return_url' => Context::getContext()->link->getPageLink('order.php',''),
+				'base_url' => __PS_BASE_URI__
 		
 		));
 		
@@ -185,6 +223,14 @@ class MakePaymentHandlerCore extends AbstractHandler
 		$payment['ui_element_type'] = 'form';
 		$payment['ui_element_form'] = $content;
 
+		$ui_list[] = $payment;		
+		
+		$ui = '<input type="text" placeholder="支付宝流水号" name="txn_id"/><br>';
+		$ui = $ui.'<input type="button" class="action-button transaction_nonaction" name="submit_payment_transaction" value="提交支付信息"/>';
+		
+		$payment['ui_element_type'] = 'custom';
+		$payment['ui_element_custom_content'] = $ui;
+		
 		$ui_list[] = $payment;
 		
 		return $ui_list;

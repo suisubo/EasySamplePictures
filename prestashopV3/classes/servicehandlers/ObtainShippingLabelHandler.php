@@ -36,7 +36,7 @@ class ObtainShippingLabelHandlerCore extends AbstractHandler
     		
     }
     
-	public function getReadableStatusString($context_inputs, $service_parameters, $lang = null){
+	public function getReadableStatusString($context_inputs, $service_parameters, $nonaction){
 		return null;
 	}
 	

@@ -41,6 +41,7 @@ $(document).ready(
 								
 				var base_url = '';
 				var transaction_id = '';
+				var terminate = 0;
 				
 				$.each(inputs, function (index){
 					var name = $(this).attr("name");
@@ -54,8 +55,11 @@ $(document).ready(
 						transaction_id = value;
 					
 					if(name == "current_step")
-						return;//demo mode
+						terminate = 1;//demo mode
 				});
+				
+				if(terminate == 1)
+					return;
 				
 				$.ajax({
 					type: 'POST',
