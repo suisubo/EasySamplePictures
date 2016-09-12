@@ -1,10 +1,5 @@
 <?php
 
-namespace AfterShip;
-
-use AfterShip\Core\Request;
-use AfterShip\Exception\AftershipException;
-
 class Trackings extends Request
 {
 

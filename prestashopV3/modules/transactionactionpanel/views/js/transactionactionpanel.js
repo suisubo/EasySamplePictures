@@ -81,6 +81,8 @@ $(document).ready(
 								$('.fotorama').fotorama();
 								$("#transation_block_" + transaction_id).fadeIn("slow");
 							});
+						}else{
+							$("#error_"+transaction_id).text(data.errors);
 						}
 					}});
 
@@ -135,6 +137,8 @@ $(document).ready(
 								$('.fotorama').fotorama();
 								$("#transation_block_" + transaction_id).fadeIn("slow");
 							});
+						}else{
+							$("#error_"+transaction_id).text(data.errors);
 						}
 					}});
 

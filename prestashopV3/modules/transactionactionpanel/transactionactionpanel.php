@@ -519,7 +519,7 @@ class transactionactionpanel extends Module
 		
 		$return = AbstractHandler::PROCESS_SUCCESS;
 		
-		if ($action_partner == $is_admin)
+		if ($action_partner == $is_admin && $actionbutton == null)
 			$return = $handler->processUIInputs ( $local_params, $outputs, $service_params, $errorinfo );
 		else
 			$return = $handler->processUIInputsNonAction ( $local_params, $outputs, $service_params, $errorinfo );

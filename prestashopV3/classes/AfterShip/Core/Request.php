@@ -1,9 +1,5 @@
 <?php
 
-namespace AfterShip\Core;
-
-use AfterShip\Exception\AftershipException;
-
 class Request
 {
 	private $_api_url = 'https://api.aftership.com';

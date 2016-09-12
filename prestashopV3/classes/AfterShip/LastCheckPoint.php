@@ -1,10 +1,5 @@
 <?php
 
-namespace AfterShip;
-
-use AfterShip\Core\Request;
-use AfterShip\Exception\AftershipException;
-
 /**
  * Get tracking information of the last checkpoint of a tracking.
  * Class LastCheckPoint
