@@ -576,7 +576,13 @@ class transactionactionpanel extends Module
 				$ajaxReturn ['next_step'] = $this->displayTransactionDetail ( $transacton );				
 			}
 		} else {
-			$ajaxReturn ['errors'] = $errorinfo;
+			$finalerror = '';
+			foreach($errorinfo as $error)
+			{
+				$finalerror = $finalerror.$error.'<br>';
+			}
+			
+			$ajaxReturn ['errors'] = $finalerror;
 		}
 		
 		return $ajaxReturn;

@@ -18,8 +18,8 @@
 <label><font size="4"><b>第一步： 选择支付方式<b></font></label><br>
 <label><font size="2">如果选用支付宝付款目前只支持直接付款，请手工填入收款人<b> subo.sui@gmail.com <b>和支付金额 {$total}</font></label><br>
 <br>
-<br>
-<div>
+<br> 
+<div> 
 	<span style="float: right;">
 	<p class="payment_module_transaction">
 		<a href="https://www.alipay.com/"><img style="width: 200px" src="{$base_url}/modules/transactionactionpanel/views/img/alipay.jpg"></a> 		

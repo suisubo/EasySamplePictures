@@ -7,39 +7,66 @@ class MonitorShippingHandlerCore extends AbstractHandler
 	public function processUIInputs($context_inputs, &$outputs, $service_parameters, &$error_info){    		
     }
     
-	public function getReadableStatusString($context_inputs, $service_parameters, $nonaction){
-		
-		if(array_key_exists('aftership_id1', $context_inputs))
+	public function getReadableStatusString($context_inputs, $service_parameters, $nonaction)
+	{
+		for($i = 1; $i <= 5;$i++)
 		{
-			$trackings = new Trackings($this->after_shipping_api_key);
-			$trackings->get_by_id('53df4a90868a6df243b6efd8', array(
-					'fields' => 'customer_name'
-			));
+			if(array_key_exists('aftership_id'.$i, $context_inputs))
+			{
+				$trackings = new Trackings($this->after_shipping_api_key);
+				$checkpoints=  $trackings->get_by_id('53df4a90868a6df243b6efd8', array(
+						'fields' => 'checkpoints'
+				));
+			}
+			
+			return null;
 		}
 		
-		return null;
 	}
 	
 	public function processUIInputsNonAction($context_inputs, &$outputs, $service_parameters, &$error_info)
 	{		
 		$actionbutton = Tools::getValue ( 'actionbutton' );
+		$error_info = array();
 		if ($actionbutton == 'submit_shipping_info') {
-			$shipping_label = Tools::getValue('shipping_label1');
-			
 			$trackings = new Trackings($this->after_shipping_api_key);
-			
-			try{
-				$response = $trackings->create($shipping_label);				
+			for($i = 1; $i <= 5;$i++)
+			{
+				$shipping_label = Tools::getValue('shipping_label'.$i);
+				$shipping_content = Tools::getValue('shipping_content'.$i);
 				
-				if(array_key_exists('meta', $response) && $response['meta']['code'] == 201)
+				if($shipping_label == null || strlen($shipping_label) == 0)
 				{
-					$outputs['shipping_label1'] = $shipping_label;
-					$outputs['shipping_carrier1'] = $response['data']['tracking']['slug'];
-					$outputs['aftership_id1'] = $response['data']['tracking']['id'];
+					$outputs['shipping_label'.$i] = '';
+					$outputs['shipping_carrier'.$i] = '';
+					$outputs['aftership_id'.$i] = '';
+					
+					continue;
 				}
 				
-			}catch(Exception $e){
-				$error_info[] = '无效的运单信息：'.$shipping_label.' '.$e->getMessage();
+				if($shipping_content == null || strlen($shipping_content) == 0)
+				{
+					$error_info[] = '运单号'.$i.' &lt;'.$shipping_label.$i.'&gt; 的描述为空 ';
+					continue;
+				}
+				
+				try{
+					$response = $trackings->create($shipping_label);
+				
+					if(array_key_exists('meta', $response) && $response['meta']['code'] == 201)
+					{
+						$outputs['shipping_label'.$i] = $shipping_label;
+						$outputs['shipping_carrier'.$i] = $response['data']['tracking']['slug'];
+						$outputs['aftership_id'.$i] = $response['data']['tracking']['id'];
+					}
+				
+				}catch(Exception $e){
+					$error_info[] = '无效的运单信息：&lt;'.$shipping_label.$i.'&gt; '.$e->getMessage();					
+				}
+			}
+			
+			if(count($error_info) > 0)
+			{
 				return AbstractHandler::PROCESS_FAIL;
 			}
 		}

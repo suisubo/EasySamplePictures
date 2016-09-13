@@ -82,7 +82,7 @@ $(document).ready(
 								$("#transation_block_" + transaction_id).fadeIn("slow");
 							});
 						}else{
-							$("#error_"+transaction_id).text(data.errors);
+							$("#error_"+transaction_id).html(data.errors);
 						}
 					}});
 
